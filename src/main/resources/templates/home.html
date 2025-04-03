@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Page</title>
+</head>
+<body>
+    <h1>You Successfully Logged In</h1>
+    <div>
+        <h3>Here is your JWT Token</h3>
+        <a id="jwt_text"></a>
+    </div>
+    <script>
+        document.getElementById("jwt_text").innerHTML = localStorage.getItem("jwtToken");
+    </script>
+</body>
+</html>
