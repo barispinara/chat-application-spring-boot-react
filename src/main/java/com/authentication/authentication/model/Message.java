@@ -23,6 +23,9 @@ public class Message {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @Column(name = "content", unique = false, nullable = false)
+  private String content;
+
   @Column(name = "sender", unique = false, nullable = false)
   private User sender;
 
