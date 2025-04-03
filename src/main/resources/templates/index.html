@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Form</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container d-flex justify-content-center align-items-center vh-100">
+        <div class="card shadow-lg p-4" style="width: 400px;">
+            <h3 class="text-center mb-4">Login</h3>
+            <form action="/user/login" method="POST" id="login-form">
+                <div class="mb-3">
+                    <label for="login-username" class="form-label">Username</label>
+                    <input type="text" class="form-control" id="login-username" name="username"
+                        placeholder="Enter username" required>
+                </div>
+                <div class="mb-3">
+                    <label for="login-password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="login-password" name="password"
+                        placeholder="Enter password" required>
+                </div>
+                <div class="text-danger" id="login-error"></div>
+                <div class="text-success" id="login-valid"></div>
+                <a href="/register" style="font-size: medium; font-style: italic;">Don't you have an account</a>
+                <button type=" submit" class="btn btn-primary w-100">Login</button>
+            </form>
+        </div>
+    </div>
+    </div>
+
+    <!-- Bootstrap JS (for tabs functionality) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Handle form submissions and display error messages
+        document.getElementById("login-form").addEventListener("submit", function (event) {
+            event.preventDefault(); // Prevent form submission to show validation errors
+
+            const formData = new FormData(this);
+            const loginData = {}
+
+            formData.forEach((value, key) => {
+                loginData[key] = value;
+            })
+
+            fetch('/user/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(loginData)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message) {
+                        // Display error messages for login
+                        document.getElementById("login-error").textContent = data.message;
+                    } else if (data.token) {
+                        // If JWT token is returned, store it
+                        localStorage.setItem("jwtToken", data.token)
+                        // Handle successful login (redirect or show success message)
+                        document.getElementById("login-valid").textContent = "Login is successful";
+                        setTimeout(navigateToHome, 2000);
+
+                    } else {
+                        window.location.href = "/error";
+                    }
+                })
+                .catch(error => {
+                    document.getElementById("login-error").textContent = "An error occurred. Please try again.";
+                });
+        });
+
+        function navigateToHome() {
+            window.location.href = "/home"
+        }
+    </script>
+</body>
+
+</html>
