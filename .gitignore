@@ -1,6 +1,8 @@
 target/
 .data/
 .settings/
+.idea/
+.vscode/
 .factorypath
 pom.xml.tag
 pom.xml.releaseBackup
