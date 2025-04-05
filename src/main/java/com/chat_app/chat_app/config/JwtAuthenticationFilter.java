@@ -12,7 +12,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.chat_app.chat_app.service.JwtService;
 
-import io.micrometer.common.lang.NonNull;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,32 +27,29 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	@Override
 	protected void doFilterInternal(
-			@NonNull HttpServletRequest request, 
-			@NonNull HttpServletResponse response, 
-			@NonNull FilterChain filterChain
-	) throws ServletException, IOException {
+			HttpServletRequest request,
+			HttpServletResponse response,
+			FilterChain filterChain) throws ServletException, IOException {
 
 		final String authHeader = request.getHeader("Authorization");
 		final String jwtToken;
-		final String username;		
-		if (authHeader == null || !authHeader.startsWith("Bearer ")){
+		final String username;
+		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
 			filterChain.doFilter(request, response);
 			return;
 		}
 
 		jwtToken = authHeader.substring(7);
 		username = jwtService.extractUsername(jwtToken);
-		if (username != null && SecurityContextHolder.getContext().getAuthentication() == null){
+		if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 			UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
 			if (jwtService.isTokenValid((jwtToken), userDetails)) {
 				UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-					userDetails,
-					null,
-					userDetails.getAuthorities()
-				);
+						userDetails,
+						null,
+						userDetails.getAuthorities());
 				authToken.setDetails(
-					new WebAuthenticationDetailsSource().buildDetails(request)
-				);
+						new WebAuthenticationDetailsSource().buildDetails(request));
 				SecurityContextHolder.getContext().setAuthentication(authToken);
 			}
 		}

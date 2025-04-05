@@ -19,77 +19,87 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.chat_app.chat_app.payload.response.ErrorMessage;
 
+import jakarta.persistence.EntityNotFoundException;
 
 @ControllerAdvice
 public class ControllerExceptionHandler {
 
-	@ExceptionHandler(IllegalArgumentException.class)
-	public ResponseEntity<ErrorMessage> illegalArgumentException(IllegalArgumentException ex, WebRequest request){
-		ErrorMessage message = ErrorMessage.builder()
-			.statusCode(HttpStatus.BAD_REQUEST.value())
-			.timeStamp(new Date())
-			.message(ex.getMessage())
-			.description(request.getDescription(false))
-			.build();
-		
-		return new ResponseEntity<ErrorMessage>(message, HttpStatus.BAD_REQUEST);
+  @ExceptionHandler(IllegalArgumentException.class)
+  public ResponseEntity<ErrorMessage> illegalArgumentException(IllegalArgumentException ex, WebRequest request) {
+    ErrorMessage message = ErrorMessage.builder()
+        .statusCode(HttpStatus.BAD_REQUEST.value())
+        .timeStamp(new Date())
+        .message(ex.getMessage())
+        .description(request.getDescription(false))
+        .build();
 
-	}
+    return new ResponseEntity<ErrorMessage>(message, HttpStatus.BAD_REQUEST);
 
-	@ExceptionHandler(AuthenticationException.class)
-	public ResponseEntity<ErrorMessage> authenticationException(AuthenticationException ex, WebRequest request){
-		ErrorMessage message = ErrorMessage.builder()
-			.statusCode(HttpStatus.FORBIDDEN.value())
-			.timeStamp(new Date())
-			.message("Invalid username or password")
-			.description(request.getDescription(false))
-			.build();
-		
-		return new ResponseEntity<ErrorMessage>(message, HttpStatus.FORBIDDEN);
-	}
+  }
 
-	@ExceptionHandler(MethodArgumentNotValidException.class)
-	public ResponseEntity<ErrorMessage> validationException(MethodArgumentNotValidException ex, WebRequest request){
-        
-		String errorsAsJson = ex.getBindingResult().getFieldErrors()
-                .stream()
-                .collect(Collectors.groupingBy(
-                        FieldError::getField,
-                        Collectors.mapping(FieldError::getDefaultMessage, Collectors.toList())
-                ))
-                .entrySet()
-                .stream()
-                .map(entry -> "\"" + capitalize(entry.getKey()) + "\": " + entry.getValue())
-                .collect(Collectors.joining(", ", "{", "}"));
+  @ExceptionHandler(AuthenticationException.class)
+  public ResponseEntity<ErrorMessage> authenticationException(AuthenticationException ex, WebRequest request) {
+    ErrorMessage message = ErrorMessage.builder()
+        .statusCode(HttpStatus.FORBIDDEN.value())
+        .timeStamp(new Date())
+        .message("Invalid username or password")
+        .description(request.getDescription(false))
+        .build();
 
-		ErrorMessage message = ErrorMessage.builder()
-			.statusCode(HttpStatus.BAD_REQUEST.value())
-			.timeStamp(new Date())
-			.message(errorsAsJson)
-			.description(request.getDescription(false))
-			.build();
-		
-		return new ResponseEntity<ErrorMessage>(message, HttpStatus.BAD_REQUEST);
-	}
+    return new ResponseEntity<ErrorMessage>(message, HttpStatus.FORBIDDEN);
+  }
 
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ResponseEntity<ErrorMessage> validationException(MethodArgumentNotValidException ex, WebRequest request) {
 
-	@ExceptionHandler(Exception.class)
-	public ResponseEntity<ErrorMessage> globalExceptionHandler(Exception ex, WebRequest request){
-		ErrorMessage message = ErrorMessage.builder()
-			.statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
-			.timeStamp(new Date())
-			.message(ex.getMessage())
-			.description(request.getDescription(false))
-			.build();
+    String errorsAsJson = ex.getBindingResult().getFieldErrors()
+        .stream()
+        .collect(Collectors.groupingBy(
+            FieldError::getField,
+            Collectors.mapping(FieldError::getDefaultMessage, Collectors.toList())))
+        .entrySet()
+        .stream()
+        .map(entry -> "\"" + capitalize(entry.getKey()) + "\": " + entry.getValue())
+        .collect(Collectors.joining(", ", "{", "}"));
 
-		return new ResponseEntity<ErrorMessage>(message, HttpStatus.INTERNAL_SERVER_ERROR);
+    ErrorMessage message = ErrorMessage.builder()
+        .statusCode(HttpStatus.BAD_REQUEST.value())
+        .timeStamp(new Date())
+        .message(errorsAsJson)
+        .description(request.getDescription(false))
+        .build();
 
-	}
+    return new ResponseEntity<ErrorMessage>(message, HttpStatus.BAD_REQUEST);
+  }
 
-	@ExceptionHandler(NoResourceFoundException.class)
-	@ResponseStatus(HttpStatus.NOT_FOUND)
-	public String noResourceFoundException(NoResourceFoundException ex, Model model){
-		model.addAttribute("errorMessage", "The resource you are looking for could not be found.");
-		return "error";
-	}
+  public ResponseEntity<ErrorMessage> entityNotFoundException(EntityNotFoundException ex, WebRequest request) {
+    ErrorMessage message = ErrorMessage.builder()
+        .statusCode(HttpStatus.NOT_FOUND.value())
+        .timeStamp(new Date())
+        .message(ex.getMessage())
+        .description(request.getDescription(false))
+        .build();
+
+    return new ResponseEntity<ErrorMessage>(message, HttpStatus.NOT_FOUND);
+  }
+
+  @ExceptionHandler(Exception.class)
+  public ResponseEntity<ErrorMessage> globalExceptionHandler(Exception ex, WebRequest request) {
+    ErrorMessage message = ErrorMessage.builder()
+        .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+        .timeStamp(new Date())
+        .message(ex.getMessage())
+        .description(request.getDescription(false))
+        .build();
+
+    return new ResponseEntity<ErrorMessage>(message, HttpStatus.INTERNAL_SERVER_ERROR);
+
+  }
+
+  @ExceptionHandler(NoResourceFoundException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  public String noResourceFoundException(NoResourceFoundException ex, Model model) {
+    model.addAttribute("errorMessage", "The resource you are looking for could not be found.");
+    return "error";
+  }
 }
