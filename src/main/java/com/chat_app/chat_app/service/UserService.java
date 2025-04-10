@@ -2,6 +2,7 @@ package com.chat_app.chat_app.service;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +13,7 @@ import com.chat_app.chat_app.payload.request.RegisterRequest;
 import com.chat_app.chat_app.payload.response.AuthenticationResponse;
 import com.chat_app.chat_app.repository.UserRepository;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -23,9 +25,23 @@ public class UserService {
   private final JwtService jwtService;
   private final AuthenticationManager authenticationManager;
 
+  public User findUserByUsername(String username) {
+    return userRepository.findByUsername(username)
+        .orElseThrow(() -> new UsernameNotFoundException("User not found with username " + username));
+  }
+
+  public User findUserById(Long id) {
+    return userRepository.findById(id)
+        .orElseThrow(() -> new EntityNotFoundException("User not found with id " + id));
+  }
+
+  public boolean isUsernameTaken(String username) {
+    return userRepository.existsByUsername(username);
+  }
+
   public AuthenticationResponse registerUser(RegisterRequest request) {
 
-    if (userRepository.existsByUsername(request.getUsername())) {
+    if (isUsernameTaken(request.getUsername())) {
       throw new IllegalArgumentException("Username is already taken : " + request.getUsername());
     }
 
@@ -38,7 +54,7 @@ public class UserService {
         .build();
 
     User savedUser = userRepository.save(user);
-    var jwtToken = jwtService.generateToken(savedUser);
+    String jwtToken = jwtService.generateToken(savedUser);
     return AuthenticationResponse.builder()
         .token(jwtToken)
         .build();
@@ -51,9 +67,9 @@ public class UserService {
             request.getUsername(),
             request.getPassword()));
 
-    var user = userRepository.findByUsernameOrThrow(request.getUsername());
+    User user = findUserByUsername(request.getUsername());
 
-    var jwtToken = jwtService.generateToken(user);
+    String jwtToken = jwtService.generateToken(user);
 
     return AuthenticationResponse.builder()
         .token(jwtToken)

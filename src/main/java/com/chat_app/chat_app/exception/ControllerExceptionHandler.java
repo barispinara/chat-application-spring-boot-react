@@ -1,9 +1,9 @@
 package com.chat_app.chat_app.exception;
 
+import static org.springframework.util.StringUtils.capitalize;
+
 import java.util.Date;
 import java.util.stream.Collectors;
-
-import static org.springframework.util.StringUtils.capitalize;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +19,7 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.chat_app.chat_app.payload.response.ErrorMessage;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.persistence.EntityNotFoundException;
 
 @ControllerAdvice
@@ -35,6 +36,18 @@ public class ControllerExceptionHandler {
 
     return new ResponseEntity<ErrorMessage>(message, HttpStatus.BAD_REQUEST);
 
+  }
+
+  @ExceptionHandler(ExpiredJwtException.class)
+  public ResponseEntity<ErrorMessage> expiredJwtException(ExpiredJwtException ex, WebRequest request) {
+    ErrorMessage message = ErrorMessage.builder()
+        .statusCode(HttpStatus.FORBIDDEN.value())
+        .timeStamp(new Date())
+        .message(ex.getMessage())
+        .description(request.getDescription(false))
+        .build();
+
+    return new ResponseEntity<ErrorMessage>(message, HttpStatus.FORBIDDEN);
   }
 
   @ExceptionHandler(AuthenticationException.class)
@@ -72,6 +85,7 @@ public class ControllerExceptionHandler {
     return new ResponseEntity<ErrorMessage>(message, HttpStatus.BAD_REQUEST);
   }
 
+  @ExceptionHandler(EntityNotFoundException.class)
   public ResponseEntity<ErrorMessage> entityNotFoundException(EntityNotFoundException ex, WebRequest request) {
     ErrorMessage message = ErrorMessage.builder()
         .statusCode(HttpStatus.NOT_FOUND.value())
