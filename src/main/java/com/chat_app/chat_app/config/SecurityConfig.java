@@ -18,33 +18,32 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
-    
-    private static final String[] WHITE_LIST_URL = {
-        "/**"
-    };
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final AuthenticationProvider authenticationProvider;
+  private static final String[] WHITE_LIST_URL = {
+      "/user/**"
+  };
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) 
-        throws Exception{
-            httpSecurity
-                .csrf(AbstractHttpConfigurer::disable)
-                .headers(h -> 
-                    h.frameOptions(f -> f.disable())
-                )
-                .authorizeHttpRequests(req ->
-                    req.requestMatchers(WHITE_LIST_URL)
-                    .permitAll()
-                    // .requestMatchers("/*").hasAnyRole(Role.ADMIN.name())
-                    .anyRequest()
-                    .authenticated()
-                )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authenticationProvider(authenticationProvider)
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-            
-            return httpSecurity.build();
-    }
+  private final JwtAuthenticationFilter jwtAuthenticationFilter;
+  private final AuthenticationProvider authenticationProvider;
+  private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+
+  @Bean
+  public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity)
+      throws Exception {
+    httpSecurity
+        .csrf(AbstractHttpConfigurer::disable)
+        .headers(h -> h.frameOptions(f -> f.disable()))
+        .authorizeHttpRequests(req -> req.requestMatchers(WHITE_LIST_URL)
+            .permitAll()
+            // .requestMatchers("/*").hasAnyRole(Role.ADMIN.name())
+            .anyRequest()
+            .authenticated())
+        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .exceptionHandling(exception -> exception
+            .authenticationEntryPoint(jwtAuthenticationEntryPoint))
+        .authenticationProvider(authenticationProvider)
+        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+    return httpSecurity.build();
+  }
 }
