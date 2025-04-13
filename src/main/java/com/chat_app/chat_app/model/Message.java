@@ -2,6 +2,9 @@ package com.chat_app.chat_app.model;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -28,7 +31,7 @@ public class Message {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "content", unique = false, nullable = false)
+  @Column(name = "content", nullable = false)
   private String content;
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -39,9 +42,14 @@ public class Message {
   @JoinColumn(name = "chat_room_id")
   private ChatRoom chatRoom;
 
-  @Column(name = "sent_at", unique = false, nullable = false)
+  @Column(name = "sent_at", updatable = false)
+  @CreationTimestamp
   private LocalDateTime sentAt;
 
-  @Column(name = "is_seen", unique = false, nullable = false)
+  @Column(name = "updated_at", updatable = true)
+  @UpdateTimestamp
+  private LocalDateTime updatedAt;
+
+  @Column(name = "is_seen", nullable = false)
   private Boolean isSeen;
 }
