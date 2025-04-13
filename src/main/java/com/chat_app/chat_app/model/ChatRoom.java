@@ -3,38 +3,33 @@ package com.chat_app.chat_app.model;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.DiscriminatorColumn;
-import jakarta.persistence.DiscriminatorType;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Inheritance;
-import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Inheritance(strategy = InheritanceType.JOINED)
-@DiscriminatorColumn(name = "chat_type", discriminatorType = DiscriminatorType.STRING)
-@Table(name = "chat_room")
-public abstract class ChatRoom {
+@Table(name = "chat_room", uniqueConstraints = @UniqueConstraint(columnNames = { "user_pair_key" }))
+public class ChatRoom {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -48,8 +43,29 @@ public abstract class ChatRoom {
   @UpdateTimestamp
   private LocalDateTime updatedAt;
 
-  @ManyToMany(fetch = FetchType.LAZY)
-  @JoinTable(name = "chat_room_participants", joinColumns = @JoinColumn(name = "chat_room_id_name"), inverseJoinColumns = @JoinColumn(name = "user_id"))
-  private Set<User> participants = new HashSet<>();
+  @ManyToMany
+  @JoinTable(name = "chatroom_users", joinColumns = @JoinColumn(name = "chatroom_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
+  private Set<User> users = new HashSet<>();
+
+  // Enforcing uniqueness
+  @Column(name = "user_pair_key", nullable = false, unique = true)
+  private String userPairKey;
+
+  // Overriding set method from Lombok @Setter
+  public void setUsers(Set<User> users) {
+    if (users == null || users.size() != 2) {
+      throw new IllegalArgumentException("Chatroom must have exactly 2 users.");
+    }
+
+    this.users = users;
+    this.userPairKey = generateUserPairKey(users);
+  }
+
+  public static String generateUserPairKey(Set<User> users) {
+    return users.stream()
+        .map(user -> user.getId().toString())
+        .sorted()
+        .collect(Collectors.joining("_"));
+  }
 
 }

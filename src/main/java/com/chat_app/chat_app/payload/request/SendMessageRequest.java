@@ -12,11 +12,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SendMessageRequest {
 
-  @NotBlank(message = "user id is required.")
-  private Integer userId;
-
   @NotBlank(message = "chat id is required.")
-  private Integer chatId;
+  private Long chatId;
 
   @NotBlank(message = "Content can not empty")
   private String content;

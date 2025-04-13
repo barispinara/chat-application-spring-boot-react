@@ -20,7 +20,8 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
   private static final String[] WHITE_LIST_URL = {
-      "/user/**"
+      "/user/**",
+      "/h2-console/**",
   };
 
   private final JwtAuthenticationFilter jwtAuthenticationFilter;
