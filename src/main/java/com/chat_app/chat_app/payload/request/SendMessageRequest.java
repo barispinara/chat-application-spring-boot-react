@@ -1,6 +1,7 @@
 package com.chat_app.chat_app.payload.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,9 +13,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SendMessageRequest {
 
-  @NotBlank(message = "chat id is required.")
+  @NotNull(message = "chat id is required.")
   private Long chatId;
 
-  @NotBlank(message = "Content can not empty")
+  @NotBlank(message = "Content can not be empty.")
   private String content;
 }

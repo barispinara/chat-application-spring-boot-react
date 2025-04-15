@@ -37,8 +37,11 @@ public class MessageController {
   }
 
   @GetMapping("/{chat_id}")
-  public ResponseEntity<?> getLatestMessageByChatRoom(@PathVariable Long chat_id) {
-    return ResponseEntity.ok(messageService.getLatestMessageByChatRoom(chat_id));
+  public ResponseEntity<Message> getLatestMessageByChatRoom(@PathVariable Long chat_id) {
+    // return ResponseEntity.ok(messageService.getLatestMessageByChatRoom(chat_id));
+    return messageService.getLatestMessageByChatRoom(chat_id)
+        .map(ResponseEntity::ok)
+        .orElseGet(() -> ResponseEntity.notFound().build());
   }
 
 }
