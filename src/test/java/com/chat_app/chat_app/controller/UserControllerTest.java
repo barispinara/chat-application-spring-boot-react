@@ -1,17 +1,16 @@
 package com.chat_app.chat_app.controller;
 
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -20,7 +19,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.chat_app.chat_app.config.SecurityConfig;
 import com.chat_app.chat_app.model.Role;
 import com.chat_app.chat_app.model.User;
 import com.chat_app.chat_app.payload.request.LoginRequest;
@@ -32,8 +30,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
-@Import(SecurityConfig.class)
 @WebMvcTest(controllers = UserController.class)
+@AutoConfigureMockMvc(addFilters = false)
 public class UserControllerTest {
 
   @Autowired
@@ -48,10 +46,6 @@ public class UserControllerTest {
   @MockitoBean
   private AuthenticationProvider authenticationProvider;
 
-  @InjectMocks
-  private UserController userController;
-
-  @Autowired
   static RegisterRequest registerRequest;
   static LoginRequest loginRequest;
   static User dbUser;
