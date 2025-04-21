@@ -1,12 +1,14 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
 import LoginPage from "../pages/Login/Login";
+import RegisterPage from "../pages/Register/Register";
 
 export const AppRoutes: React.FC = () => {
-  return(
-      <Routes>
-        <Route path="/login" element = {<LoginPage/>}/>
-        <Route path="/" element = {<LoginPage/>}/>
-      </Routes>
+  return (
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+    </Routes>
   )
 }

@@ -1,20 +1,19 @@
-import { WhatsApp } from '@mui/icons-material';
-import { Box, Container, Paper, Typography } from '@mui/material';
+import { Box, Container, Paper, Typography } from '@mui/material'
 import React from 'react'
-import LoginForm from '../../components/auth/LoginForm';
+import RegisterForm from '../../components/auth/RegisterForm'
+import { WhatsApp } from '@mui/icons-material'
 
-const LoginPage: React.FC = () => {
-
+const RegisterPage: React.FC = () => {
   return (
-    <Container 
-      maxWidth='sm' 
+    <Container
+      maxWidth='sm'
       sx={{
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
         minHeight: '100vh',
       }}
-      >
+    >
       <Box
         sx={{
           display: 'flex',
@@ -33,7 +32,7 @@ const LoginPage: React.FC = () => {
             borderRadius: 2,
           }}
         >
-          <Box sx={{ mb: 3, textAlign: 'center'}}>
+          <Box sx={{ mb: 3, textAlign: 'center' }}>
             <WhatsApp
               sx={{
                 fontSize: 48,
@@ -48,20 +47,20 @@ const LoginPage: React.FC = () => {
                 mb: 1,
               }}
             >
-              Chat App 
+              Chat App
             </Typography>
             <Typography
               variant='h5'
-              sx={{ mb: 3}}
+              sx={{ mb: 3 }}
             >
-              Sign in
+              Sign up
             </Typography>
           </Box>
-          <LoginForm/>
+          <RegisterForm />
         </Paper>
       </Box>
     </Container>
   )
 }
 
-export default LoginPage
+export default RegisterPage
