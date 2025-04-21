@@ -1,27 +1,27 @@
-import { WhatsApp } from "@mui/icons-material";
-import { Box, Container, Paper, Typography } from "@mui/material";
-import React from "react";
-import LoginForm from "../../components/auth/LoginForm";
+import { WhatsApp } from '@mui/icons-material';
+import { Box, Container, Paper, Typography } from '@mui/material';
+import React from 'react'
+import LoginForm from '../../components/auth/LoginForm';
 
 const LoginPage: React.FC = () => {
+
   return (
-    <Container
-      maxWidth="sm"
+    <Container 
+      maxWidth='sm' 
       sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        minHeight: "100vh",
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh',
       }}
-    >
+      >
       <Box
         sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          width: "100%",
-          minHeight: "100vh",
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '100%',
           py: 4,
         }}
       >
@@ -29,36 +29,39 @@ const LoginPage: React.FC = () => {
           elevation={3}
           sx={{
             p: 4,
-            width: "100%",
+            width: '100%',
             borderRadius: 2,
           }}
         >
-          <Box sx={{ mb: 3, textAlign: "center" }}>
+          <Box sx={{ mb: 3, textAlign: 'center'}}>
             <WhatsApp
               sx={{
                 fontSize: 48,
-                mb: 1,
+                mb: 1
               }}
             />
             <Typography
-              component="h1"
-              variant="h4"
+              component='h1'
+              variant='h4'
               sx={{
-                fontWeight: "bold",
+                fontWeight: 'bold',
                 mb: 1,
               }}
             >
-              Chat App
+              Chat App 
             </Typography>
-            <Typography variant="h5" sx={{ mb: 3 }}>
+            <Typography
+              variant='h5'
+              sx={{ mb: 3}}
+            >
               Sign in
             </Typography>
           </Box>
-          <LoginForm />
+          <LoginForm/>
         </Paper>
       </Box>
     </Container>
-  );
-};
+  )
+}
 
-export default LoginPage;
+export default LoginPage

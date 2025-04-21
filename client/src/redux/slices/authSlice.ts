@@ -4,7 +4,6 @@ import {
   AuthState,
   loginUserType,
   registerUserType,
-  User,
 } from "../../types/authTypes";
 import { UserService } from "../../services/UserService";
 
