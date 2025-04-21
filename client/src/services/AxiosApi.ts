@@ -2,7 +2,7 @@ import axios, { AxiosHeaders, InternalAxiosRequestConfig } from "axios";
 import { useNavigate } from "react-router-dom";
 
 const AxiosApi = axios.create({
-  baseURL: process.env.REACT_APP_SERVER_URL || "http://localhost:8080/",
+  baseURL: import.meta.env.VITE_APP_SERVER_URL || "http://localhost:8080/",
   headers: {
     "Content-Type": "application/json",
     "Access-Control-Allow-Origin": "*",
