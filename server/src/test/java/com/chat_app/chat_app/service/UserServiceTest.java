@@ -82,11 +82,10 @@ public class UserServiceTest {
     when(userRepository.existsByUsername(registerRequest.getUsername())).thenReturn(false);
     when(passwordEncoder.encode(registerRequest.getPassword())).thenReturn("encoded");
     when(userRepository.save(isA(User.class))).thenReturn(dbUser);
-    when(jwtService.generateToken(dbUser)).thenReturn("jwtToken12345");
 
-    AuthenticationResponse authResponse = userService.registerUser(registerRequest);
+    String registerResponse = userService.registerUser(registerRequest);
 
-    assertEquals("jwtToken12345", authResponse.getToken());
+    assertEquals("User registered successfully " + dbUser.getId(), registerResponse);
 
   }
 
