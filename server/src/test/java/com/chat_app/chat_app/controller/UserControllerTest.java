@@ -3,6 +3,7 @@ package com.chat_app.chat_app.controller;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -86,7 +87,7 @@ public class UserControllerTest {
   @Test
   public void registerUserWhenUsernameDoesNotExist() throws Exception {
     when(userService.registerUser(registerRequest))
-        .thenReturn(new AuthenticationResponse("jwtToken12345"));
+        .thenReturn("User registered successfully " + dbUser.getId());
 
     String requestJson = ow.writeValueAsString(registerRequest);
 
@@ -95,7 +96,7 @@ public class UserControllerTest {
         .content(requestJson))
         .andExpectAll(
             status().isOk(),
-            jsonPath("$.token").value("jwtToken12345"));
+            content().string("User registered successfully " + dbUser.getId()));
 
     verify(userService).registerUser(registerRequest);
   }

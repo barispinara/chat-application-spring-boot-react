@@ -39,7 +39,7 @@ public class UserService {
     return userRepository.existsByUsername(username);
   }
 
-  public AuthenticationResponse registerUser(RegisterRequest request) {
+  public String registerUser(RegisterRequest request) {
 
     if (isUsernameTaken(request.getUsername())) {
       throw new IllegalArgumentException("Username is already taken : " + request.getUsername());
@@ -54,10 +54,7 @@ public class UserService {
         .build();
 
     User savedUser = userRepository.save(user);
-    String jwtToken = jwtService.generateToken(savedUser);
-    return AuthenticationResponse.builder()
-        .token(jwtToken)
-        .build();
+    return "User registered successfully " + savedUser.getId();
 
   }
 
