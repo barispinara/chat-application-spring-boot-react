@@ -11,6 +11,7 @@ import com.chat_app.chat_app.model.User;
 import com.chat_app.chat_app.payload.request.LoginRequest;
 import com.chat_app.chat_app.payload.request.RegisterRequest;
 import com.chat_app.chat_app.payload.response.AuthenticationResponse;
+import com.chat_app.chat_app.payload.response.AuthenticationResponse.UserDTO;
 import com.chat_app.chat_app.repository.UserRepository;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -70,6 +71,13 @@ public class UserService {
 
     return AuthenticationResponse.builder()
         .token(jwtToken)
+        .user(
+            UserDTO.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .build())
         .build();
   }
 }

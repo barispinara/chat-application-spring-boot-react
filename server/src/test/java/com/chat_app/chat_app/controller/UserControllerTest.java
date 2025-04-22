@@ -25,6 +25,7 @@ import com.chat_app.chat_app.model.User;
 import com.chat_app.chat_app.payload.request.LoginRequest;
 import com.chat_app.chat_app.payload.request.RegisterRequest;
 import com.chat_app.chat_app.payload.response.AuthenticationResponse;
+import com.chat_app.chat_app.payload.response.AuthenticationResponse.UserDTO;
 import com.chat_app.chat_app.service.JwtService;
 import com.chat_app.chat_app.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -50,6 +51,7 @@ public class UserControllerTest {
   static RegisterRequest registerRequest;
   static LoginRequest loginRequest;
   static User dbUser;
+  static UserDTO responseUserDTO;
 
   static Authentication authentication;
   static ObjectMapper mapper;
@@ -76,6 +78,13 @@ public class UserControllerTest {
         .lastName("test")
         .role(Role.USER)
         .password("encoded")
+        .build();
+
+    responseUserDTO = UserDTO.builder()
+        .id(1L)
+        .username("admin")
+        .firstName("admin")
+        .lastName("test")
         .build();
 
     authentication = new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword());
@@ -123,7 +132,7 @@ public class UserControllerTest {
   @Test
   public void loginUserWithRightCredentials() throws Exception {
     when(userService.loginUser(loginRequest))
-        .thenReturn(new AuthenticationResponse("jwtToken12345"));
+        .thenReturn(new AuthenticationResponse("jwtToken12345", responseUserDTO));
 
     String requestJson = ow.writeValueAsString(loginRequest);
 
@@ -132,7 +141,11 @@ public class UserControllerTest {
         .content(requestJson))
         .andExpectAll(
             status().isOk(),
-            jsonPath("$.token").value("jwtToken12345"));
+            jsonPath("$.token").value("jwtToken12345"),
+            jsonPath("$.user.id").value(1L),
+            jsonPath("$.user.username").value("admin"),
+            jsonPath("$.user.firstName").value("admin"),
+            jsonPath("$.user.lastName").value("test"));
 
     verify(userService).loginUser(loginRequest);
   }

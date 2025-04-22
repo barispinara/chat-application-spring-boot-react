@@ -28,6 +28,7 @@ import com.chat_app.chat_app.model.User;
 import com.chat_app.chat_app.payload.request.LoginRequest;
 import com.chat_app.chat_app.payload.request.RegisterRequest;
 import com.chat_app.chat_app.payload.response.AuthenticationResponse;
+import com.chat_app.chat_app.payload.response.AuthenticationResponse.UserDTO;
 import com.chat_app.chat_app.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -51,6 +52,7 @@ public class UserServiceTest {
   static RegisterRequest registerRequest;
   static LoginRequest loginRequest;
   static User dbUser;
+  static UserDTO responseUserDTO;
 
   @BeforeAll
   static void setup() {
@@ -74,6 +76,13 @@ public class UserServiceTest {
         .lastName("test")
         .role(Role.USER)
         .password("encoded")
+        .build();
+
+    responseUserDTO = UserDTO.builder()
+        .id(1L)
+        .username("admin")
+        .firstName("admin")
+        .lastName("test")
         .build();
   }
 
@@ -112,6 +121,7 @@ public class UserServiceTest {
     AuthenticationResponse authResponse = userService.loginUser(loginRequest);
 
     assertEquals("jwtToken12345", authResponse.getToken());
+    assertEquals(responseUserDTO, authResponse.getUser());
     verify(authenticationManager).authenticate(any(Authentication.class));
 
   }
