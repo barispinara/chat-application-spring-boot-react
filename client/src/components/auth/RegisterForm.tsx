@@ -1,26 +1,40 @@
-import React, { useEffect, useState } from 'react'
-import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { useNavigate } from 'react-router-dom';
-import { clearError, registerUser } from '../../redux/slices/authSlice';
-import { validateFirstName, validateLastName, validatePassword, validateUsername } from '../../utils/userValidation';
-import { Alert, Box, Button, CircularProgress, TextField } from '@mui/material';
+import React, { useEffect, useState } from "react";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import { useNavigate } from "react-router-dom";
+import { clearError, registerUser } from "../../redux/slices/authSlice";
+import {
+  validateFirstName,
+  validateLastName,
+  validatePassword,
+  validateUsername,
+} from "../../utils/userValidation";
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  TextField,
+  Typography,
+} from "@mui/material";
 
 const RegisterForm: React.FC = () => {
-  const [username, setUsername] = useState('');
-  const [usernameError, setUsernameError] = useState('');
-  const [password, setPassword] = useState('');
-  const [passwordError, setPasswordError] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [firstNameError, setFirstNameError] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [lastNameError, setLastNameError] = useState('');
+  const [username, setUsername] = useState("");
+  const [usernameError, setUsernameError] = useState("");
+  const [password, setPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [firstNameError, setFirstNameError] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [lastNameError, setLastNameError] = useState("");
 
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { isLoading, error, isAuthenticated } = useAppSelector((state) => state.auth);
+  const { isLoading, error, isAuthenticated } = useAppSelector(
+    (state) => state.auth,
+  );
 
   useEffect(() => {
-    if (isAuthenticated) navigate('/chat');
+    if (isAuthenticated) navigate("/chat");
     return () => {
       dispatch(clearError());
     };
@@ -37,21 +51,35 @@ const RegisterForm: React.FC = () => {
     setFirstNameError(newFirstNameError);
     setLastNameError(newLastNameError);
 
-    return !newUsernameError && !newPasswordError && !newFirstNameError && !newLastNameError;
-  }
+    return (
+      !newUsernameError &&
+      !newPasswordError &&
+      !newFirstNameError &&
+      !newLastNameError
+    );
+  };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (validateForm()) {
-      dispatch(registerUser({ username, password, firstName, lastName }));
-      // TODO: Add navigation to go back to the Login page if register operation was successful
+      const resultAction = await dispatch(
+        registerUser({ username, password, firstName, lastName }),
+      );
+
+      if (registerUser.fulfilled.match(resultAction)) {
+        navigate("/login");
+      }
     }
-  }
+  };
 
   return (
     <Box component={"form"} onSubmit={handleSubmit} sx={{ mt: 1 }}>
-      {error && <Alert severity='error' sx={{ mb: 2 }}>{error}</Alert>}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
 
       <TextField
         margin="normal"
@@ -105,23 +133,36 @@ const RegisterForm: React.FC = () => {
         helperText={lastNameError}
       />
       <Button
-        type='submit'
+        type="submit"
         fullWidth
-        variant='contained'
+        variant="contained"
         sx={{
           mt: 3,
           mb: 2,
         }}
         disabled={isLoading}
       >
-        {isLoading ? (
-          <CircularProgress size={24} color="inherit" />
-        ) : (
-          'Sign in'
-        )}
+        {isLoading ? <CircularProgress size={24} color="inherit" /> : "Sign in"}
       </Button>
+      <Box sx={{ textAlign: "center", mt: 2 }}>
+        <Typography variant="body2">
+          You have already account?{" "}
+          <Typography
+            component="span"
+            variant="body2"
+            sx={{
+              cursor: "pointer",
+              "&:hover": { textDecoration: "underline" },
+            }}
+            onClick={() => navigate("/login")}
+          >
+            Sign In
+          </Typography>
+        </Typography>
+      </Box>
     </Box>
-  )
-}
+  );
+};
 
-export default RegisterForm
+export default RegisterForm;
+

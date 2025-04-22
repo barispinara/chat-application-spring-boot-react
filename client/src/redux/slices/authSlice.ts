@@ -1,11 +1,11 @@
-import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { UserService } from "../../services/UserService";
 import {
   AuthResponse,
   AuthState,
   loginUserType,
   registerUserType,
 } from "../../types/authTypes";
-import { UserService } from "../../services/UserService";
 
 // Helper function to get token from localStorage
 const getStoredToken = (): string | null => {
@@ -54,7 +54,10 @@ export const loginUser = createAsyncThunk(
       const response = await UserService.login(credentials);
       return response.data as AuthResponse;
     } catch (error: any) {
-      return rejectWithValue(error.message || "Login failed");
+      console.log("This is the error ", error);
+      return rejectWithValue(
+        error.response.data.message || error.message || "Login failed",
+      );
     }
   },
 );
@@ -63,10 +66,11 @@ export const registerUser = createAsyncThunk(
   "auth/register",
   async (credentials: registerUserType, { rejectWithValue }) => {
     try {
-      const response = await UserService.register(credentials);
-      return response.data as AuthResponse;
+      await UserService.register(credentials);
     } catch (error: any) {
-      return rejectWithValue(error.message || "Registration failed");
+      return rejectWithValue(
+        error.response.data.message || error.message || "Registration failed",
+      );
     }
   },
 );
@@ -119,22 +123,10 @@ const authSlice = createSlice({
         state.isLoading = true;
         state.error = null;
       })
-      .addCase(
-        registerUser.fulfilled,
-        (state, action: PayloadAction<AuthResponse>) => {
-          state.isLoading = false;
-          state.user = action.payload.user;
-          state.token = action.payload.token;
-          state.isAuthenticated = true;
-
-          // Store token and user separately in localStorage
-          localStorage.setItem(
-            "token",
-            JSON.stringify({ token: action.payload.token }),
-          );
-          localStorage.setItem("user", JSON.stringify(action.payload.user));
-        },
-      )
+      .addCase(registerUser.fulfilled, (state) => {
+        state.isLoading = false;
+        state.isAuthenticated = false;
+      })
       .addCase(registerUser.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
