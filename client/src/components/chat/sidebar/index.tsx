@@ -2,6 +2,8 @@ import { SettingsTwoTone } from "@mui/icons-material";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { Avatar, Box, IconButton, Tab, Typography } from "@mui/material";
 import React, { useState } from "react";
+import ChatListTab from "./ChatList";
+import UserListTab from "./UserList";
 
 const Sidebar: React.FC = () => {
   const [selectedTabValue, setSelectedTabValue] = useState("1");
@@ -73,8 +75,12 @@ const Sidebar: React.FC = () => {
             <Tab label="People" value="2" />
           </TabList>
         </Box>
-        <TabPanel value="1">CHAT LIST WILL BE IMPLEMENTED</TabPanel>
-        <TabPanel value="2">USER LIST WILL BE IMPLEMENTED</TabPanel>
+        <TabPanel value="1">
+          <ChatListTab />
+        </TabPanel>
+        <TabPanel value="2">
+          <UserListTab />
+        </TabPanel>
       </TabContext>
     </Box>
   );
