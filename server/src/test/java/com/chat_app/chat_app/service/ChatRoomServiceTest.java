@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -178,7 +179,17 @@ public class ChatRoomServiceTest {
       EntityExistsException exception = assertThrows(EntityExistsException.class,
           () -> chatRoomService.createChatRoom(dbSecondUser.getId()));
 
-      assertTrue(exception.getMessage().equals("There is already chatroom between these users"));
+        assertEquals("There is already chatroom between these users", exception.getMessage());
     }
+  }
+
+  @Test
+  public void getAllChatRoomsOfUser() {
+    when(authenticationService.getAuthenticatedCurrentUser()).thenReturn(dbFirstUser);
+    when(chatRoomRepository.findByUsers_Id(dbFirstUser.getId())).thenReturn(List.of(dbChatRoom));
+
+    List<ChatRoom> chatRooms = chatRoomService.getAllChatRoomsOfUser();
+    assertEquals(1, chatRooms.size());
+    assertEquals(chatRooms, List.of(dbChatRoom));
   }
 }

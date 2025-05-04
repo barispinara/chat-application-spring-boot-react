@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 import com.chat_app.chat_app.payload.dto_model.UserDTO;
@@ -166,6 +167,19 @@ public class ChatRoomControllerTest {
             jsonPath("$.users[*].password").doesNotExist());
 
     verify(chatRoomService).createChatRoom(dbSecondUser.getId());
+  }
+
+  @Test
+  public void getAllChatRoomsOfUser() throws Exception {
+    when(chatRoomService.getAllChatRoomsOfUser()).thenReturn(List.of(dbChatRoom));
+    when(chatRoomService.generateChatRoomResponseByChatRoom(dbChatRoom)).thenReturn(chatRoomResponse);
+
+    mockMvc.perform(get("/chat/user/all"))
+            .andExpectAll(
+                    status().isOk(),
+                    jsonPath("$[0].id").value(1),
+                    jsonPath("$[0].users", hasSize(2))
+            );
   }
 
 }

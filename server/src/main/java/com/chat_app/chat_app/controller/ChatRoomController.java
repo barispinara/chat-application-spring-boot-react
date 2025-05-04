@@ -14,6 +14,9 @@ import com.chat_app.chat_app.service.ChatRoomService;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("/chat")
 @Validated
@@ -31,6 +34,16 @@ public class ChatRoomController {
   public ResponseEntity<ChatRoomResponse> createChatRoom(@PathVariable Long user_id) {
     ChatRoom chatRoom = chatRoomService.createChatRoom(user_id);
     return ResponseEntity.ok(chatRoomService.generateChatRoomResponseByChatRoom(chatRoom));
+  }
+
+  @GetMapping("/user/all")
+  public ResponseEntity<List<ChatRoomResponse>> getAllChatRoomsOfUser() {
+    List<ChatRoom> chatRooms = chatRoomService.getAllChatRoomsOfUser();
+    return ResponseEntity.ok(
+            chatRooms.stream()
+                    .map(chatRoomService::generateChatRoomResponseByChatRoom)
+                    .collect(Collectors.toList())
+    );
   }
 
   @GetMapping("/{chat_id}")

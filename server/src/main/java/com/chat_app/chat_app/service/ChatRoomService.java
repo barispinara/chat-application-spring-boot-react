@@ -1,7 +1,9 @@
 package com.chat_app.chat_app.service;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -33,6 +35,11 @@ public class ChatRoomService {
   public ChatRoom getChatRoomById(Long id) {
     return chatRoomRepository.findById(id)
         .orElseThrow(() -> new EntityNotFoundException("ChatRoom not found with id " + id));
+  }
+
+  public List<ChatRoom> getAllChatRoomsOfUser() {
+    User authenticatedUser = authenticationService.getAuthenticatedCurrentUser();
+    return chatRoomRepository.findByUsers_Id(authenticatedUser.getId());
   }
 
   public void deleteChatRoomById(Long id) {
