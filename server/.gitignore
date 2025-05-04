@@ -2,6 +2,7 @@ target/
 .data/
 .settings/
 .idea/
+.idea
 .vscode/
 .factorypath
 pom.xml.tag

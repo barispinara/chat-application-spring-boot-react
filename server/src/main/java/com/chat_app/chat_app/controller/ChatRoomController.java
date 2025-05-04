@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.chat_app.chat_app.model.ChatRoom;
+import com.chat_app.chat_app.payload.response.ChatRoomResponse;
 import com.chat_app.chat_app.service.ChatRoomService;
 
 import lombok.RequiredArgsConstructor;
@@ -21,21 +22,21 @@ public class ChatRoomController {
   private final ChatRoomService chatRoomService;
 
   @GetMapping("/user/{user_id}")
-  public ResponseEntity<?> getChatRoomByUser(@PathVariable Long user_id) {
+  public ResponseEntity<ChatRoomResponse> getChatRoomByUser(@PathVariable Long user_id) {
     ChatRoom chatRoom = chatRoomService.getChatRoomByUsers(user_id);
-    return ResponseEntity.ok(chatRoom);
+    return ResponseEntity.ok(chatRoomService.generateChatRoomResponseByChatRoom(chatRoom));
   }
 
   @PostMapping("/create/{user_id}")
-  public ResponseEntity<?> createChatRoom(@PathVariable Long user_id) {
+  public ResponseEntity<ChatRoomResponse> createChatRoom(@PathVariable Long user_id) {
     ChatRoom chatRoom = chatRoomService.createChatRoom(user_id);
-    return ResponseEntity.ok(chatRoom);
+    return ResponseEntity.ok(chatRoomService.generateChatRoomResponseByChatRoom(chatRoom));
   }
 
   @GetMapping("/{chat_id}")
-  public ResponseEntity<?> getChatRoomById(@PathVariable Long chat_id) {
+  public ResponseEntity<ChatRoomResponse> getChatRoomById(@PathVariable Long chat_id) {
     ChatRoom chatRoom = chatRoomService.getChatRoomById(chat_id);
-    return ResponseEntity.ok(chatRoom);
+    return ResponseEntity.ok(chatRoomService.generateChatRoomResponseByChatRoom(chatRoom));
   }
 
 }
