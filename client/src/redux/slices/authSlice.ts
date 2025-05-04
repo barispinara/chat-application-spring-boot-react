@@ -6,35 +6,7 @@ import {
   loginUserType,
   registerUserType,
 } from "../../types/authTypes";
-
-// Helper function to get token from localStorage
-const getStoredToken = (): string | null => {
-  const storedToken = localStorage.getItem("token");
-  if (storedToken) {
-    try {
-      const parsedToken = JSON.parse(storedToken);
-      return parsedToken.token || null;
-    } catch (e) {
-      localStorage.removeItem("token");
-      return null;
-    }
-  }
-  return null;
-};
-
-// Helper function to get user from localStorage
-const getStoredUser = () => {
-  const storedUser = localStorage.getItem("user");
-  if (storedUser) {
-    try {
-      return JSON.parse(storedUser);
-    } catch (e) {
-      localStorage.removeItem("user");
-      return null;
-    }
-  }
-  return null;
-};
+import { getStoredToken, getStoredUser } from "../../helper/storage";
 
 const token = getStoredToken();
 const user = getStoredUser();
