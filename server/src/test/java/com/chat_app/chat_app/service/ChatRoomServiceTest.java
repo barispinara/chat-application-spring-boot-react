@@ -81,7 +81,7 @@ public class ChatRoomServiceTest {
       mockedStatic.when(() -> ChatRoom.generateUserPairKey(Set.of(dbFirstUser, dbSecondUser))).thenReturn("1_2");
       when(chatRoomRepository.findByUserPairKey("1_2")).thenReturn(Optional.of(dbChatRoom));
 
-      ChatRoom result = chatRoomService.getOrCreateChatRoomByUsers(dbSecondUser.getId());
+      ChatRoom result = chatRoomService.getChatRoomByUsers(dbSecondUser.getId());
 
       assertNotNull(result);
       assertEquals(dbChatRoom.getId(), result.getId());
@@ -97,9 +97,9 @@ public class ChatRoomServiceTest {
     try (MockedStatic<ChatRoom> mockedStatic = Mockito.mockStatic(ChatRoom.class)) {
       mockedStatic.when(() -> ChatRoom.generateUserPairKey(Set.of(dbFirstUser, dbSecondUser))).thenReturn("1_2");
       when(chatRoomRepository.findByUserPairKey("1_2")).thenReturn(Optional.empty());
-      when(chatRoomRepository.save(any(ChatRoom.class))).thenReturn(dbChatRoom);
+      // when(chatRoomRepository.save(any(ChatRoom.class))).thenReturn(dbChatRoom);
 
-      ChatRoom result = chatRoomService.getOrCreateChatRoomByUsers(dbSecondUser.getId());
+      ChatRoom result = chatRoomService.getChatRoomByUsers(dbSecondUser.getId());
 
       assertNotNull(result);
       assertEquals(dbChatRoom.getId(), result.getId());

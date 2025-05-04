@@ -18,13 +18,12 @@ public class ChatRoomService {
   private final UserService userService;
   private final AuthenticationService authenticationService;
 
-  public ChatRoom getOrCreateChatRoomByUsers(Long targetUserId) {
-    User authUser = authenticationService.getAuthenticatedCurrentUser();
-    User targetUser = userService.findUserById(targetUserId);
-    Set<User> users = Set.of(targetUser, authUser);
+  public ChatRoom getChatRoomByUsers(Long targetUserId) {
+    Set<User> users = generateSetOfUser(targetUserId);
 
     String userPairKey = ChatRoom.generateUserPairKey(users);
-    return chatRoomRepository.findByUserPairKey(userPairKey).orElseGet(() -> createChatRoom(users));
+    return chatRoomRepository.findByUserPairKey(userPairKey)
+        .orElseThrow(() -> new EntityNotFoundException("You don't have chatroom with this user " + targetUserId));
   }
 
   public ChatRoom getChatRoomById(Long id) {
@@ -38,9 +37,17 @@ public class ChatRoomService {
     }
   }
 
-  public ChatRoom createChatRoom(Set<User> users) {
+  public ChatRoom createChatRoom(Long targetUserId) {
+    Set<User> users = generateSetOfUser(targetUserId);
+
     ChatRoom newChatRoom = new ChatRoom();
     newChatRoom.setUsers(users);
     return chatRoomRepository.save(newChatRoom);
+  }
+
+  private Set<User> generateSetOfUser(Long targetUserId) {
+    User authUser = authenticationService.getAuthenticatedCurrentUser();
+    User targetUser = userService.findUserById(targetUserId);
+    return Set.of(authUser, targetUser);
   }
 }

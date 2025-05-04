@@ -72,13 +72,13 @@ public class ChatRoomControllerTest {
 
   @Test
   public void getOrCreateChatRoomByUserWhenExists() throws Exception {
-    when(chatRoomService.getOrCreateChatRoomByUsers(dbSecondUser.getId())).thenReturn(dbChatRoom);
+    when(chatRoomService.getChatRoomByUsers(dbSecondUser.getId())).thenReturn(dbChatRoom);
 
     mockMvc.perform(get("/chat/user/{user_id}", dbSecondUser.getId()))
         .andExpectAll(
             status().isOk());
 
-    verify(chatRoomService).getOrCreateChatRoomByUsers(dbSecondUser.getId());
+    verify(chatRoomService).getChatRoomByUsers(dbSecondUser.getId());
   }
 
   @Test

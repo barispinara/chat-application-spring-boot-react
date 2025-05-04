@@ -4,6 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,8 +21,14 @@ public class ChatRoomController {
   private final ChatRoomService chatRoomService;
 
   @GetMapping("/user/{user_id}")
-  public ResponseEntity<?> getOrCreateChatRoomByUser(@PathVariable Long user_id) {
-    ChatRoom chatRoom = chatRoomService.getOrCreateChatRoomByUsers(user_id);
+  public ResponseEntity<?> getChatRoomByUser(@PathVariable Long user_id) {
+    ChatRoom chatRoom = chatRoomService.getChatRoomByUsers(user_id);
+    return ResponseEntity.ok(chatRoom);
+  }
+
+  @PostMapping("/create/{user_id}")
+  public ResponseEntity<?> createChatRoom(@PathVariable Long user_id) {
+    ChatRoom chatRoom = chatRoomService.createChatRoom(user_id);
     return ResponseEntity.ok(chatRoom);
   }
 
