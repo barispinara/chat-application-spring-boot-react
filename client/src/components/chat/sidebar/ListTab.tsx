@@ -11,16 +11,25 @@ import {
 } from "@mui/material";
 import { useAppDispatch, useAppSelector } from "../../../redux/hooks";
 import { useEffect } from "react";
-import { getAllChatRoomsOfUser } from "../../../redux/slices/chatRoomSlice";
+import {
+  getAllChatRoomsOfUser,
+  setActiveChat,
+} from "../../../redux/slices/chatRoomSlice";
+import { ChatRoom } from "../../../types/chatRoomTypes";
+import { findAndGetUserFullName } from "../../../utils/userUtils";
 
 const ListTab: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { loading, error, chats } = useAppSelector((state) => state.chat);
+  const { chats } = useAppSelector((state) => state.chat);
   const { user } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
     dispatch(getAllChatRoomsOfUser());
   }, []);
+
+  const onButtonClick = (currChatRoom: ChatRoom) => {
+    dispatch(setActiveChat(currChatRoom));
+  };
 
   return (
     <Box>
@@ -41,7 +50,7 @@ const ListTab: React.FC = () => {
       <Box mt={2}>
         <List disablePadding component="div">
           {chats.map((chatItem, index) => (
-            <ListItemButton key={index}>
+            <ListItemButton key={index} onClick={() => onButtonClick(chatItem)}>
               <ListItemAvatar>
                 <Avatar />
               </ListItemAvatar>
@@ -59,10 +68,7 @@ const ListTab: React.FC = () => {
                     noWrap: true,
                   },
                 }}
-                primary={
-                  chatItem.users.find((cUser) => cUser.id !== user?.id)
-                    ?.firstName
-                }
+                primary={findAndGetUserFullName(chatItem.users, user?.id)}
                 secondary={chatItem.latestMessage.content}
               />
             </ListItemButton>

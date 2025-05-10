@@ -17,8 +17,8 @@ const Chat: React.FC = () => {
     >
       <Box
         sx={{
-          display: "flex",
           flex: "0 0 30%",
+          borderRight: 1,
         }}
       >
         <Sidebar />

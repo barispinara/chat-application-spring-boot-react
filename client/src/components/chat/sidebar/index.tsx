@@ -4,9 +4,11 @@ import { Avatar, Box, IconButton, Tab, Typography } from "@mui/material";
 import React, { useState } from "react";
 import ChatListTab from "./ChatList";
 import UserListTab from "./UserList";
+import { useAppSelector } from "../../../redux/hooks";
 
 const Sidebar: React.FC = () => {
   const [selectedTabValue, setSelectedTabValue] = useState("1");
+  const { user } = useAppSelector((state) => state.auth);
 
   const handleTabChange = (
     event: React.SyntheticEvent,
@@ -32,10 +34,10 @@ const Sidebar: React.FC = () => {
           >
             <Box>
               <Typography variant="h5" noWrap>
-                TEST
+                {user?.firstName} {user?.lastName}
               </Typography>
               <Typography variant="subtitle1" noWrap>
-                TEST
+                Will be implemented
               </Typography>
             </Box>
             <IconButton
