@@ -1,6 +1,9 @@
 import { ScheduleTwoTone } from "@mui/icons-material";
 import { Avatar, Box, Card, Divider, styled, Typography } from "@mui/material";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useAppDispatch, useAppSelector } from "../../../redux/hooks";
+import { getAllMessages } from "../../../redux/slices/messageSlice";
+import { Message } from "../../../types/messageTypes";
 
 const DividerWrapper = styled(Divider)(`
     .MuiDivider-wrapper {
@@ -33,99 +36,350 @@ const CardWrapperSecondary = styled(Card)(`
 `);
 
 const ChatMessage: React.FC = () => {
+  const dispatch = useAppDispatch();
+  const { user } = useAppSelector((state) => state.auth);
+  const { activeChat } = useAppSelector((state) => state.chat);
+  const { loading, messages, error } = useAppSelector((state) => state.message);
+  const [currentChatMessages, setCurrentChatMessages] = useState<Message[]>([]);
+
+  useEffect(() => {
+    if (activeChat) {
+      dispatch(getAllMessages(activeChat.id));
+    }
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (activeChat) {
+      setCurrentChatMessages(
+        messages[activeChat.id] ? messages[activeChat.id] : [],
+      );
+    }
+  }, [messages]);
+
   return (
     <Box p={3}>
-      <DividerWrapper>2 min ago</DividerWrapper>
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "flex-start",
-          py: 3,
-        }}
-      >
-        <Avatar
-          variant="rounded"
-          sx={{
-            width: 50,
-            height: 50,
-          }}
-          alt="TEST USERNAME"
-        />
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "flex-start",
-            flexDirection: "column",
-            justifyContent: "flex-start",
-            ml: 2,
-          }}
-        >
-          <CardWrapperSecondary>Test Message</CardWrapperSecondary>
-          <Typography
-            variant="subtitle1"
+      {activeChat ? (
+        currentChatMessages.map((currMessage, index) => (
+          <Box
             sx={{
-              pt: 1,
               display: "flex",
-              alignItems: "center",
+              alignItems: "flex-start",
+              justifyContent:
+                currMessage.sender.username === user?.username
+                  ? "flex-start"
+                  : "flex-end",
+              py: 3,
             }}
           >
-            <ScheduleTwoTone
+            <Avatar
+              variant="rounded"
               sx={{
-                mr: 0.5,
+                width: 50,
+                height: 50,
               }}
-              fontSize="small"
+              alt={currMessage.sender.username}
             />
-            2 min ago
-          </Typography>
-        </Box>
-      </Box>
-      <Box
-        display="flex"
-        alignItems="flex-start"
-        justifyContent="flex-end"
-        py={3}
-      >
-        <Box
-          display="flex"
-          alignItems="flex-end"
-          flexDirection="column"
-          justifyContent="flex-end"
-          mr={2}
-        >
-          <CardWrapperPrimary>
-            Yes, I'll email them right now. I'll let you know once the remaining
-            invoices are done.
-          </CardWrapperPrimary>
-          <Typography
-            variant="subtitle1"
-            sx={{
-              pt: 1,
-              display: "flex",
-              alignItems: "center",
-            }}
-          >
-            <ScheduleTwoTone
+            <Box
               sx={{
-                mr: 0.5,
+                display: "flex",
+                alignItems: "flex-start",
+                flexDirection: "column",
+                justifyContent: "flex-start",
+                ml: 2,
               }}
-              fontSize="small"
-            />
-            2 min ago
-          </Typography>
-        </Box>
-        <Avatar
-          variant="rounded"
-          sx={{
-            width: 50,
-            height: 50,
-          }}
-          alt="TEST USERNAME"
-        />
-      </Box>
-      <DividerWrapper>2 min ago</DividerWrapper>
+            >
+              <CardWrapperSecondary>{currMessage.content}</CardWrapperSecondary>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  pt: 1,
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                <ScheduleTwoTone sx={{ mr: 0.5 }} fontSize="small" />
+                {currMessage.sentAt}
+              </Typography>
+            </Box>
+          </Box>
+        ))
+      ) : (
+        <></>
+      )}
     </Box>
   );
+  {
+    /* <Box p={3}> */
+  }
+  {
+    /*   <DividerWrapper>2 min ago</DividerWrapper> */
+  }
+  {
+    /*   <Box */
+  }
+  {
+    /*     sx={{ */
+  }
+  {
+    /*       display: "flex", */
+  }
+  {
+    /*       alignItems: "flex-start", */
+  }
+  {
+    /*       justifyContent: "flex-start", */
+  }
+  {
+    /*       py: 3, */
+  }
+  {
+    /*     }} */
+  }
+  {
+    /*   > */
+  }
+  {
+    /*     <Avatar */
+  }
+  {
+    /*       variant="rounded" */
+  }
+  {
+    /*       sx={{ */
+  }
+  {
+    /*         width: 50, */
+  }
+  {
+    /*         height: 50, */
+  }
+  {
+    /*       }} */
+  }
+  {
+    /*       alt="TEST USERNAME" */
+  }
+  {
+    /*     /> */
+  }
+  {
+    /*     <Box */
+  }
+  {
+    /*       sx={{ */
+  }
+  {
+    /*         display: "flex", */
+  }
+  {
+    /*         alignItems: "flex-start", */
+  }
+  {
+    /*         flexDirection: "column", */
+  }
+  {
+    /*         justifyContent: "flex-start", */
+  }
+  {
+    /*         ml: 2, */
+  }
+  {
+    /*       }} */
+  }
+  {
+    /*     > */
+  }
+  {
+    /*       <CardWrapperSecondary>Test Message</CardWrapperSecondary> */
+  }
+  {
+    /*       <Typography */
+  }
+  {
+    /*         variant="subtitle1" */
+  }
+  {
+    /*         sx={{ */
+  }
+  {
+    /*           pt: 1, */
+  }
+  {
+    /*           display: "flex", */
+  }
+  {
+    /*           alignItems: "center", */
+  }
+  {
+    /*         }} */
+  }
+  {
+    /*       > */
+  }
+  {
+    /*         <ScheduleTwoTone */
+  }
+  {
+    /*           sx={{ */
+  }
+  {
+    /*             mr: 0.5, */
+  }
+  {
+    /*           }} */
+  }
+  {
+    /*           fontSize="small" */
+  }
+  {
+    /*         /> */
+  }
+  {
+    /*         2 min ago */
+  }
+  {
+    /*       </Typography> */
+  }
+  {
+    /*     </Box> */
+  }
+  {
+    /*   </Box> */
+  }
+  {
+    /*   <Box */
+  }
+  {
+    /*     display="flex" */
+  }
+  {
+    /*     alignItems="flex-start" */
+  }
+  {
+    /*     justifyContent="flex-end" */
+  }
+  {
+    /*     py={3} */
+  }
+  {
+    /*   > */
+  }
+  {
+    /*     <Box */
+  }
+  {
+    /*       display="flex" */
+  }
+  {
+    /*       alignItems="flex-end" */
+  }
+  {
+    /*       flexDirection="column" */
+  }
+  {
+    /*       justifyContent="flex-end" */
+  }
+  {
+    /*       mr={2} */
+  }
+  {
+    /*     > */
+  }
+  {
+    /*       <CardWrapperPrimary> */
+  }
+  {
+    /*         Yes, I'll email them right now. I'll let you know once the remaining */
+  }
+  {
+    /*         invoices are done. */
+  }
+  {
+    /*       </CardWrapperPrimary> */
+  }
+  {
+    /*       <Typography */
+  }
+  {
+    /*         variant="subtitle1" */
+  }
+  {
+    /*         sx={{ */
+  }
+  {
+    /*           pt: 1, */
+  }
+  {
+    /*           display: "flex", */
+  }
+  {
+    /*           alignItems: "center", */
+  }
+  {
+    /*         }} */
+  }
+  {
+    /*       > */
+  }
+  {
+    /*         <ScheduleTwoTone */
+  }
+  {
+    /*           sx={{ */
+  }
+  {
+    /*             mr: 0.5, */
+  }
+  {
+    /*           }} */
+  }
+  {
+    /*           fontSize="small" */
+  }
+  {
+    /*         /> */
+  }
+  {
+    /*         2 min ago */
+  }
+  {
+    /*       </Typography> */
+  }
+  {
+    /*     </Box> */
+  }
+  {
+    /*     <Avatar */
+  }
+  {
+    /*       variant="rounded" */
+  }
+  {
+    /*       sx={{ */
+  }
+  {
+    /*         width: 50, */
+  }
+  {
+    /*         height: 50, */
+  }
+  {
+    /*       }} */
+  }
+  {
+    /*       alt="TEST USERNAME" */
+  }
+  {
+    /*     /> */
+  }
+  {
+    /*   </Box> */
+  }
+  {
+    /*   <DividerWrapper>2 min ago</DividerWrapper> */
+  }
+  {
+    /* </Box> */
+  }
 };
-
 export default ChatMessage;

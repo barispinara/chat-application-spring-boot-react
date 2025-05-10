@@ -84,7 +84,7 @@ const messageSlice = createSlice({
       })
       .addCase(getAllMessages.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || "Failed to get all messages";
+        state.error = action.payload as string;
       })
       .addCase(sendMessage.pending, (state) => {
         state.loading = true;
@@ -105,7 +105,7 @@ const messageSlice = createSlice({
       )
       .addCase(sendMessage.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || "Failed to send message";
+        state.error = action.payload as string;
       })
       .addCase(getLatestMessage.pending, (state) => {
         state.loading = true;
@@ -126,7 +126,7 @@ const messageSlice = createSlice({
       )
       .addCase(getLatestMessage.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || "Failed to get latest message";
+        state.error = action.payload as string;
       });
   },
 });
