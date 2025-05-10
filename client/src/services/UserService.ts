@@ -5,6 +5,7 @@ import AxiosApi from "./AxiosApi";
 const PATHS = {
   REGISTER: "user/register",
   LOGIN: "user/login",
+  GET_ALL_USERS: "user/all",
 };
 
 export class UserService {
@@ -22,6 +23,13 @@ export class UserService {
       return AxiosApi.post(PATHS.REGISTER, registerUserRequest);
     } catch (error) {
       throw new Error("Registration failed. Please try again.");
+    }
+  }
+  public static getAllUsers(): Promise<AxiosResponse> {
+    try {
+      return AxiosApi.get(PATHS.GET_ALL_USERS);
+    } catch (error) {
+      throw new Error("Error occured while getting all users");
     }
   }
 }

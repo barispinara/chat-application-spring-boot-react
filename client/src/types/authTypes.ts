@@ -23,6 +23,7 @@ export interface AuthState {
   isLoading: boolean;
   error: string | null;
   isAuthenticated: boolean;
+  userList: User[];
 }
 
 export interface AuthResponse {

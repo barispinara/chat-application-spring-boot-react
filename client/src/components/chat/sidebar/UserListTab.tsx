@@ -9,28 +9,20 @@ import {
   ListItemText,
   TextField,
 } from "@mui/material";
+import React from "react";
 import { useAppDispatch, useAppSelector } from "../../../redux/hooks";
-import { useEffect } from "react";
-import {
-  getAllChatRoomsOfUser,
-  setActiveChat,
-} from "../../../redux/slices/chatRoomSlice";
-import { ChatRoom } from "../../../types/chatRoomTypes";
-import { findAndGetUserFullName } from "../../../utils/userUtils";
+import { createChatRoom } from "../../../redux/slices/chatRoomSlice";
+import { User } from "../../../types/authTypes";
 
-const ListTab: React.FC = () => {
+const UserListTab: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { chats } = useAppSelector((state) => state.chat);
-  const { user } = useAppSelector((state) => state.auth);
+  const { userList } = useAppSelector((state) => state.auth);
 
-  useEffect(() => {
-    dispatch(getAllChatRoomsOfUser());
-  }, []);
-
-  const onButtonClick = (currChatRoom: ChatRoom) => {
-    dispatch(setActiveChat(currChatRoom));
+  const onButtonClick = (clickedUser: User) => {
+    dispatch(createChatRoom(clickedUser.id));
   };
 
+  // TODO: ChatList and UserList tab has same SearchField, it needs to be united with search component
   return (
     <Box>
       <TextField
@@ -46,11 +38,11 @@ const ListTab: React.FC = () => {
           },
         }}
         placeholder="Search..."
-      />{" "}
+      />
       <Box mt={2}>
         <List disablePadding component="div">
-          {chats.map((chatItem, index) => (
-            <ListItemButton key={index} onClick={() => onButtonClick(chatItem)}>
+          {userList.map((user, index) => (
+            <ListItemButton key={index} onClick={() => onButtonClick(user)}>
               <ListItemAvatar>
                 <Avatar />
               </ListItemAvatar>
@@ -61,15 +53,8 @@ const ListTab: React.FC = () => {
                     variant: "h5",
                     noWrap: true,
                   },
-                  secondary: {
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    width: "15vw",
-                    noWrap: true,
-                  },
                 }}
-                primary={findAndGetUserFullName(chatItem.users, user?.id)}
-                secondary={chatItem.latestMessage.content}
+                primary={`${user.firstName} ${user.lastName}`}
               />
             </ListItemButton>
           ))}
@@ -79,4 +64,4 @@ const ListTab: React.FC = () => {
   );
 };
 
-export default ListTab;
+export default UserListTab;

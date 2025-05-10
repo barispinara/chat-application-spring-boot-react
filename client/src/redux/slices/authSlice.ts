@@ -17,6 +17,7 @@ const initialState: AuthState = {
   isLoading: false,
   error: null,
   isAuthenticated: !!token,
+  userList: [],
 };
 
 export const loginUser = createAsyncThunk(
@@ -26,7 +27,6 @@ export const loginUser = createAsyncThunk(
       const response = await UserService.login(credentials);
       return response.data as AuthResponse;
     } catch (error: any) {
-      console.log("This is the error ", error);
       return rejectWithValue(
         error.response.data.message || error.message || "Login failed",
       );
@@ -47,6 +47,22 @@ export const registerUser = createAsyncThunk(
   },
 );
 
+export const fetchAllUsers = createAsyncThunk(
+  "auth/all",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await UserService.getAllUsers();
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response.data.message ||
+          error.message ||
+          "Getting All User failed",
+      );
+    }
+  },
+);
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -60,6 +76,9 @@ const authSlice = createSlice({
     },
     clearError: (state) => {
       state.error = null;
+    },
+    clearUserList: (state) => {
+      state.userList = [];
     },
   },
   extraReducers: (builder) => {
@@ -103,6 +122,20 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload as string;
         state.isAuthenticated = false;
+      })
+      .addCase(fetchAllUsers.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+        // state.userList = [];
+      })
+      .addCase(fetchAllUsers.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.userList = action.payload;
+      })
+      .addCase(fetchAllUsers.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+        // state.userList = [];
       });
   },
 });
