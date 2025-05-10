@@ -144,12 +144,14 @@ const chatRoomSlice = createSlice({
         state.error = action.payload as string;
       })
       .addCase(getAllChatRoomsOfUser.pending, (state) => {
-        (state.loading = true), (state.error = null);
+        state.loading = true;
+        state.error = null;
       })
       .addCase(
         getAllChatRoomsOfUser.fulfilled,
         (state, action: PayloadAction<ChatRoom[]>) => {
-          (state.loading = true), (state.chats = action.payload);
+          state.loading = true;
+          state.chats = action.payload;
         },
       )
       .addCase(getAllChatRoomsOfUser.rejected, (state, action) => {
