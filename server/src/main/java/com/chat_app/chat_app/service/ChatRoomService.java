@@ -9,6 +9,8 @@ import com.chat_app.chat_app.repository.ChatRoomRepository;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -21,7 +23,12 @@ public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final UserService userService;
     private final AuthenticationService authenticationService;
-    private final MessageService messageService;
+    private MessageService messageService;
+
+    @Autowired
+    public void setMessageService(@Lazy MessageService messageService) {
+        this.messageService = messageService;
+    }
 
     public ChatRoom getChatRoomByUsers(Long targetUserId) {
         Set<User> users = generateSetOfUser(targetUserId);
