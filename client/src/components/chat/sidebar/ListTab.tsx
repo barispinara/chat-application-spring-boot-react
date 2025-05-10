@@ -9,8 +9,19 @@ import {
   ListItemText,
   TextField,
 } from "@mui/material";
+import { useAppDispatch, useAppSelector } from "../../../redux/hooks";
+import { useEffect } from "react";
+import { getAllChatRoomsOfUser } from "../../../redux/slices/chatRoomSlice";
 
 const ListTab: React.FC = () => {
+  const dispatch = useAppDispatch();
+  const { loading, error, chats } = useAppSelector((state) => state.chat);
+  const { user } = useAppSelector((state) => state.auth);
+
+  useEffect(() => {
+    dispatch(getAllChatRoomsOfUser());
+  }, []);
+
   return (
     <Box>
       <TextField
@@ -29,28 +40,33 @@ const ListTab: React.FC = () => {
       />{" "}
       <Box mt={2}>
         <List disablePadding component="div">
-          <ListItemButton selected>
-            <ListItemAvatar>
-              <Avatar />
-            </ListItemAvatar>
-            <ListItemText
-              sx={{ mr: 1 }}
-              slotProps={{
-                primary: {
-                  variant: "h5",
-                  noWrap: true,
-                },
-                secondary: {
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  width: "15vw",
-                  noWrap: true,
-                },
-              }}
-              primary="Test Surname"
-              secondary="Lorem Ipsum"
-            />
-          </ListItemButton>
+          {chats.map((chatItem, index) => (
+            <ListItemButton key={index}>
+              <ListItemAvatar>
+                <Avatar />
+              </ListItemAvatar>
+              <ListItemText
+                sx={{ mr: 1 }}
+                slotProps={{
+                  primary: {
+                    variant: "h5",
+                    noWrap: true,
+                  },
+                  secondary: {
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    width: "15vw",
+                    noWrap: true,
+                  },
+                }}
+                primary={
+                  chatItem.users.find((cUser) => cUser.id !== user?.id)
+                    ?.firstName
+                }
+                secondary={chatItem.latestMessage.content}
+              />
+            </ListItemButton>
+          ))}
         </List>
       </Box>
     </Box>
