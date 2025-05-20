@@ -14,6 +14,7 @@ import { useAppDispatch, useAppSelector } from "../../../redux/hooks";
 import { setActiveChat } from "../../../redux/slices/chatRoomSlice";
 import { ChatRoom } from "../../../types/chatRoomTypes";
 import { findAndGetUserFullName } from "../../../utils/userUtils";
+import webSocketService from "../../../services/WebSocketService";
 
 const ChatListTab: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -22,6 +23,7 @@ const ChatListTab: React.FC = () => {
 
   const onButtonClick = (currChatRoom: ChatRoom) => {
     dispatch(setActiveChat(currChatRoom));
+    // webSocketService.subscribeToPrivateChat(currChatRoom.id);
   };
 
   return (

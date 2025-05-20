@@ -46,7 +46,7 @@ const ChatMessage: React.FC = () => {
     if (activeChat) {
       dispatch(getAllMessages(activeChat.id));
     }
-  }, [dispatch]);
+  }, [dispatch, activeChat]);
 
   useEffect(() => {
     if (activeChat) {
@@ -54,13 +54,14 @@ const ChatMessage: React.FC = () => {
         messages[activeChat.id] ? messages[activeChat.id] : [],
       );
     }
-  }, [messages]);
+  }, [messages, activeChat]);
 
   return (
     <Box p={3}>
       {activeChat ? (
         currentChatMessages.map((currMessage, index) => (
           <Box
+            key={index}
             sx={{
               display: "flex",
               alignItems: "flex-start",
@@ -88,7 +89,13 @@ const ChatMessage: React.FC = () => {
                 ml: 2,
               }}
             >
-              <CardWrapperSecondary>{currMessage.content}</CardWrapperSecondary>
+              {currMessage.sender.username === user?.username ? (
+                <CardWrapperSecondary>
+                  {currMessage.content}
+                </CardWrapperSecondary>
+              ) : (
+                <CardWrapperPrimary>{currMessage.content}</CardWrapperPrimary>
+              )}
               <Typography
                 variant="subtitle1"
                 sx={{

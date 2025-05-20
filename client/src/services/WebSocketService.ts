@@ -1,57 +1,67 @@
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
-import { getStoredUser } from "../helper/storage";
+import { getStoredToken, getStoredUser } from "../helper/storage";
+import AuthErrorListener from "../listener/AuthErrorListener";
 
-const SOCKET_URL =
-  `${import.meta.env.VITE_APP_SERVER_URL}/ws` || "http://localhost:8080/ws";
+const SOCKET_URL = import.meta.env.VITE_APP_SERVER_URL
+  ? `${import.meta.env.VITE_APP_SERVER_URL}/ws`
+  : "http://localhost:8080/ws";
 
 export class WebSocketService {
   private client: Client | null = null;
-  private connected: boolean = false;
+  private token: string | null = getStoredToken();
 
   connect() {
-    if (this.connected) return;
-
+    if (this.client || !this.token) return;
     this.client = new Client({
-      webSocketFactory: () => new SockJS(SOCKET_URL),
+      webSocketFactory: () => {
+        const socket = new SockJS(`${SOCKET_URL}?token=${this.token}`);
+        return socket;
+      },
       onConnect: () => {
         console.log("Connected to WebSocket");
-        this.connected = true;
-        // this.subscribeToPersonalChat():
+        this.subscribeToNotification();
       },
       onDisconnect: () => {
         console.log("Disconnected from WebSocket");
-        this.connected = false;
       },
       onStompError: (frame) => {
         console.error("STOMP error", frame);
       },
+      onWebSocketError: () => {
+        console.error("ERROR");
+      },
       reconnectDelay: 5000,
     });
-
     this.client.activate();
   }
 
   disconnect() {
-    if (this.client && this.connected) {
-      this.client.deactivate();
-      this.connected = false;
+    if (this.client?.connected) {
+      this.client?.deactivate();
     }
   }
 
-  subscribeToPrivateChat() {
-    if (!this.client || !this.connected) return;
+  subscribeToNotification() {
+    if (!this.client?.connected) return;
+    const currentUserUsername = getStoredUser()?.username || "";
+    this.client.subscribe(`/app/message/notification`, (message) => {
+      const notification = JSON.parse(message.body);
+      console.log(`Received new notification ${notification}`);
+    });
+  }
 
-    const currentUserId = getStoredUser()?.id || "";
+  subscribeToPrivateChat(chatroomId: string) {
+    if (!this.client?.connected) return;
 
-    this.client.subscribe(`/chat/user/${currentUserId}`, (message) => {
+    this.client.subscribe(`/topic/message/create/${chatroomId}`, (message) => {
       const receivedMessage = JSON.parse(message.body);
-      store.dispatch(addMessage(receivedMessage));
+      console.log(`Received new message ${receivedMessage}`);
     });
   }
 
   async sendMessage(chatId: string, content: string) {
-    if (!this.client || !this.connected) {
+    if (!this.client?.connected) {
       console.error("WebSocket not connected");
       return;
     }
@@ -73,3 +83,6 @@ export class WebSocketService {
     }
   }
 }
+
+export const webSocketService = new WebSocketService();
+export default webSocketService;

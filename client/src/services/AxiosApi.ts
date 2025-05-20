@@ -28,7 +28,7 @@ AxiosApi.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 AxiosApi.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error?.response?.status === 401 && localStorage.getItem("token")) {
+    if (error?.response?.status === 401) {
       console.log("Received 401 error with existing token - session expired");
       localStorage.removeItem("token");
 

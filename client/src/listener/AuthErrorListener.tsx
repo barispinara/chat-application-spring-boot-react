@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
 import { logout } from "../redux/slices/authSlice";
 import { useAppDispatch } from "../redux/hooks";
+import { useNavigate } from "react-router-dom";
 
 function AuthErrorListener() {
   const dispatch = useAppDispatch();
