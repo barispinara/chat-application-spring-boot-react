@@ -1,12 +1,25 @@
 import { SettingsTwoTone } from "@mui/icons-material";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { Avatar, Box, IconButton, Tab, Typography } from "@mui/material";
-import React, { useState } from "react";
-import ChatListTab from "./ChatList";
-import UserListTab from "./UserList";
+import React, { useEffect, useState } from "react";
+import ChatListTab from "./ChatListTab";
+import UserListTab from "./UserListTab";
+import { useAppDispatch, useAppSelector } from "../../../redux/hooks";
+import { getAllChatRoomsOfUser } from "../../../redux/slices/chatRoomSlice";
+import { fetchAllUsers } from "../../../redux/slices/authSlice";
 
 const Sidebar: React.FC = () => {
+  const dispatch = useAppDispatch();
   const [selectedTabValue, setSelectedTabValue] = useState("1");
+  const { user } = useAppSelector((state) => state.auth);
+
+  useEffect(() => {
+    if (selectedTabValue === "1") {
+      dispatch(getAllChatRoomsOfUser());
+    } else if (selectedTabValue === "2") {
+      dispatch(fetchAllUsers());
+    }
+  }, [selectedTabValue, dispatch]);
 
   const handleTabChange = (
     event: React.SyntheticEvent,
@@ -32,10 +45,10 @@ const Sidebar: React.FC = () => {
           >
             <Box>
               <Typography variant="h5" noWrap>
-                TEST
+                {user?.firstName} {user?.lastName}
               </Typography>
               <Typography variant="subtitle1" noWrap>
-                TEST
+                Will be implemented
               </Typography>
             </Box>
             <IconButton

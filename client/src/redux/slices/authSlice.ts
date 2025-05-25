@@ -6,35 +6,7 @@ import {
   loginUserType,
   registerUserType,
 } from "../../types/authTypes";
-
-// Helper function to get token from localStorage
-const getStoredToken = (): string | null => {
-  const storedToken = localStorage.getItem("token");
-  if (storedToken) {
-    try {
-      const parsedToken = JSON.parse(storedToken);
-      return parsedToken.token || null;
-    } catch (e) {
-      localStorage.removeItem("token");
-      return null;
-    }
-  }
-  return null;
-};
-
-// Helper function to get user from localStorage
-const getStoredUser = () => {
-  const storedUser = localStorage.getItem("user");
-  if (storedUser) {
-    try {
-      return JSON.parse(storedUser);
-    } catch (e) {
-      localStorage.removeItem("user");
-      return null;
-    }
-  }
-  return null;
-};
+import { getStoredToken, getStoredUser } from "../../helper/storage";
 
 const token = getStoredToken();
 const user = getStoredUser();
@@ -45,6 +17,7 @@ const initialState: AuthState = {
   isLoading: false,
   error: null,
   isAuthenticated: !!token,
+  userList: [],
 };
 
 export const loginUser = createAsyncThunk(
@@ -54,7 +27,6 @@ export const loginUser = createAsyncThunk(
       const response = await UserService.login(credentials);
       return response.data as AuthResponse;
     } catch (error: any) {
-      console.log("This is the error ", error);
       return rejectWithValue(
         error.response.data.message || error.message || "Login failed",
       );
@@ -75,6 +47,22 @@ export const registerUser = createAsyncThunk(
   },
 );
 
+export const fetchAllUsers = createAsyncThunk(
+  "auth/all",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await UserService.getAllUsers();
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response.data.message ||
+          error.message ||
+          "Getting All User failed",
+      );
+    }
+  },
+);
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -88,6 +76,9 @@ const authSlice = createSlice({
     },
     clearError: (state) => {
       state.error = null;
+    },
+    clearUserList: (state) => {
+      state.userList = [];
     },
   },
   extraReducers: (builder) => {
@@ -131,6 +122,20 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload as string;
         state.isAuthenticated = false;
+      })
+      .addCase(fetchAllUsers.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+        // state.userList = [];
+      })
+      .addCase(fetchAllUsers.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.userList = action.payload;
+      })
+      .addCase(fetchAllUsers.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+        // state.userList = [];
       });
   },
 });

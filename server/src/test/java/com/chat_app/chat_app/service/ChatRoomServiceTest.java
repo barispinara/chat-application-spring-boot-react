@@ -4,12 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -27,6 +29,7 @@ import com.chat_app.chat_app.model.Role;
 import com.chat_app.chat_app.model.User;
 import com.chat_app.chat_app.repository.ChatRoomRepository;
 
+import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
@@ -68,12 +71,15 @@ public class ChatRoomServiceTest {
         .build();
 
     dbChatRoom = new ChatRoom();
+    dbChatRoom.setId(1L);
+    dbChatRoom.setCreatedAt(LocalDateTime.now());
+    dbChatRoom.setUpdatedAt(LocalDateTime.now());
     dbChatRoom.setUsers(Set.of(dbFirstUser, dbSecondUser));
     dbChatRoom.setUserPairKey("1_2");
   }
 
   @Test
-  public void getOrCreateChatRoomByUsersWhenExists() {
+  public void getChatRoomByUsersWhenExists() {
     when(authenticationService.getAuthenticatedCurrentUser()).thenReturn(dbFirstUser);
     when(userService.findUserById(dbSecondUser.getId())).thenReturn(dbSecondUser);
 
@@ -81,7 +87,7 @@ public class ChatRoomServiceTest {
       mockedStatic.when(() -> ChatRoom.generateUserPairKey(Set.of(dbFirstUser, dbSecondUser))).thenReturn("1_2");
       when(chatRoomRepository.findByUserPairKey("1_2")).thenReturn(Optional.of(dbChatRoom));
 
-      ChatRoom result = chatRoomService.getOrCreateChatRoomByUsers(dbSecondUser.getId());
+      ChatRoom result = chatRoomService.getChatRoomByUsers(dbSecondUser.getId());
 
       assertNotNull(result);
       assertEquals(dbChatRoom.getId(), result.getId());
@@ -90,20 +96,18 @@ public class ChatRoomServiceTest {
   }
 
   @Test
-  public void getOrCreateChatRoomByUsersWhenDoesNotExist() {
+  public void getChatRoomByUsersWhenDoesNotExist() {
     when(authenticationService.getAuthenticatedCurrentUser()).thenReturn(dbFirstUser);
     when(userService.findUserById(dbSecondUser.getId())).thenReturn(dbSecondUser);
 
     try (MockedStatic<ChatRoom> mockedStatic = Mockito.mockStatic(ChatRoom.class)) {
       mockedStatic.when(() -> ChatRoom.generateUserPairKey(Set.of(dbFirstUser, dbSecondUser))).thenReturn("1_2");
       when(chatRoomRepository.findByUserPairKey("1_2")).thenReturn(Optional.empty());
-      when(chatRoomRepository.save(any(ChatRoom.class))).thenReturn(dbChatRoom);
 
-      ChatRoom result = chatRoomService.getOrCreateChatRoomByUsers(dbSecondUser.getId());
+      EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+          () -> chatRoomService.getChatRoomByUsers(dbSecondUser.getId()));
 
-      assertNotNull(result);
-      assertEquals(dbChatRoom.getId(), result.getId());
-      assertEquals(dbChatRoom.getUserPairKey(), result.getUserPairKey());
+      assertTrue(exception.getMessage().equals("You don't have chatroom with this user " + dbSecondUser.getId()));
     }
   }
 
@@ -141,5 +145,49 @@ public class ChatRoomServiceTest {
         () -> chatRoomService.getChatRoomById(dbChatRoom.getId()));
 
     assertTrue(exception.getMessage().equals("ChatRoom not found with id " + dbChatRoom.getId()));
+  }
+
+  @Test
+  public void createChatRoomWhenDoesNotExist() {
+    when(authenticationService.getAuthenticatedCurrentUser()).thenReturn(dbFirstUser);
+    when(userService.findUserById(dbSecondUser.getId())).thenReturn(dbSecondUser);
+    try (MockedStatic<ChatRoom> mockedStatic = Mockito.mockStatic(ChatRoom.class)) {
+      mockedStatic.when(() -> ChatRoom.generateUserPairKey(Set.of(dbFirstUser, dbSecondUser))).thenReturn("1_2");
+      when(chatRoomRepository.existsByUserPairKey("1_2")).thenReturn(false);
+      when(chatRoomRepository.save(isA(ChatRoom.class))).thenReturn(dbChatRoom);
+
+      ChatRoom newChatRoom = chatRoomService.createChatRoom(dbSecondUser.getId());
+
+      assertEquals(1L, newChatRoom.getId());
+      assertEquals(2, newChatRoom.getUsers().size());
+      assertEquals("1_2", newChatRoom.getUserPairKey());
+      assertTrue(newChatRoom.getUsers().contains(dbFirstUser));
+      assertTrue(newChatRoom.getUsers().contains(dbSecondUser));
+    }
+  }
+
+  @Test
+  public void createChatRoomWhenUserPairKeyExists() {
+    when(authenticationService.getAuthenticatedCurrentUser()).thenReturn(dbFirstUser);
+    when(userService.findUserById(dbSecondUser.getId())).thenReturn(dbSecondUser);
+    try (MockedStatic<ChatRoom> mockedStatic = Mockito.mockStatic(ChatRoom.class)) {
+      mockedStatic.when(() -> ChatRoom.generateUserPairKey(Set.of(dbFirstUser, dbSecondUser))).thenReturn("1_2");
+      when(chatRoomRepository.existsByUserPairKey("1_2")).thenReturn(true);
+
+      EntityExistsException exception = assertThrows(EntityExistsException.class,
+          () -> chatRoomService.createChatRoom(dbSecondUser.getId()));
+
+      assertEquals("There is already chatroom between these users", exception.getMessage());
+    }
+  }
+
+  @Test
+  public void getAllChatRoomsOfUser() {
+    when(authenticationService.getAuthenticatedCurrentUser()).thenReturn(dbFirstUser);
+    when(chatRoomRepository.findByUsers_Id(dbFirstUser.getId())).thenReturn(List.of(dbChatRoom));
+
+    List<ChatRoom> chatRooms = chatRoomService.getAllChatRoomsOfUser();
+    assertEquals(1, chatRooms.size());
+    assertEquals(chatRooms, List.of(dbChatRoom));
   }
 }

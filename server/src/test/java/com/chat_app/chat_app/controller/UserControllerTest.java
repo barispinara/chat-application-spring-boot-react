@@ -22,10 +22,10 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.chat_app.chat_app.model.Role;
 import com.chat_app.chat_app.model.User;
+import com.chat_app.chat_app.payload.dto_model.UserDTO;
 import com.chat_app.chat_app.payload.request.LoginRequest;
 import com.chat_app.chat_app.payload.request.RegisterRequest;
 import com.chat_app.chat_app.payload.response.AuthenticationResponse;
-import com.chat_app.chat_app.payload.response.AuthenticationResponse.UserDTO;
 import com.chat_app.chat_app.service.JwtService;
 import com.chat_app.chat_app.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;

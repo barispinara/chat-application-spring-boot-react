@@ -3,6 +3,7 @@ import { BrowserRouter } from "react-router-dom";
 import { store } from "./redux/store";
 import { AppRoutes } from "./router/AppRoutes";
 import { GlobalStyles } from "@mui/material";
+import AuthErrorListener from "./listener/AuthErrorListener";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
       />
       <Provider store={store}>
         <BrowserRouter>
+          <AuthErrorListener />
           <AppRoutes />
         </BrowserRouter>
       </Provider>
