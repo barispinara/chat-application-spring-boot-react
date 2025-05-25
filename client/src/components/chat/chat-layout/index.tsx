@@ -1,12 +1,27 @@
 import { Box, Divider, Typography } from "@mui/material";
-import React from "react";
+import React, { useEffect } from "react";
 import TopBar from "./TopBar";
 import BottomBar from "./BottomBar";
 import ChatMessage from "./ChatMessage";
 import { useAppSelector } from "../../../redux/hooks";
+import webSocketService from "../../../services/WebSocketService";
 
 const ChatLayout: React.FC = () => {
   const { activeChat } = useAppSelector((state) => state.chat);
+
+  useEffect(() => {
+    console.log(`${activeChat?.id} is here`);
+    if (activeChat) {
+      console.log(`${activeChat?.id} subscribe is triggered`);
+      webSocketService.subscribeToPrivateChat(activeChat.id);
+    }
+
+    return () => {
+      console.log(`unsubscribe event triggered ${activeChat?.id}`);
+      webSocketService.unsubscribeFromChatRoom();
+    };
+  }, [activeChat]);
+
   return (
     <Box
       sx={{

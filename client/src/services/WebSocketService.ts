@@ -1,7 +1,9 @@
-import { Client } from "@stomp/stompjs";
+import { Client, StompSubscription } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { getStoredToken, getStoredUser } from "../helper/storage";
-import AuthErrorListener from "../listener/AuthErrorListener";
+import { useAppDispatch } from "../redux/hooks";
+import { addMessage } from "../redux/slices/messageSlice";
+import { store } from "../redux/store";
 
 const SOCKET_URL = import.meta.env.VITE_APP_SERVER_URL
   ? `${import.meta.env.VITE_APP_SERVER_URL}/ws`
@@ -10,6 +12,8 @@ const SOCKET_URL = import.meta.env.VITE_APP_SERVER_URL
 export class WebSocketService {
   private client: Client | null = null;
   private token: string | null = getStoredToken();
+  private privateChatSubscription: StompSubscription | null = null;
+  private currentActiveChatRoomId: string | null = null;
 
   connect() {
     if (this.client || !this.token) return;
@@ -17,6 +21,9 @@ export class WebSocketService {
       webSocketFactory: () => {
         const socket = new SockJS(`${SOCKET_URL}?token=${this.token}`);
         return socket;
+      },
+      connectHeaders: {
+        Authorization: `Bearer ${this.token}`,
       },
       onConnect: () => {
         console.log("Connected to WebSocket");
@@ -44,20 +51,50 @@ export class WebSocketService {
 
   subscribeToNotification() {
     if (!this.client?.connected) return;
-    const currentUserUsername = getStoredUser()?.username || "";
-    this.client.subscribe(`/app/message/notification`, (message) => {
-      const notification = JSON.parse(message.body);
-      console.log(`Received new notification ${notification}`);
-    });
+    this.client.subscribe(
+      `/user/notification`,
+      (message) => {
+        const notification = JSON.parse(message.body);
+        console.log(`Received new notification ${notification}`);
+        store.dispatch(addMessage(notification));
+      },
+      {
+        Authorization: `Bearer ${this.token}`,
+      },
+    );
   }
 
   subscribeToPrivateChat(chatroomId: string) {
     if (!this.client?.connected) return;
 
-    this.client.subscribe(`/topic/message/create/${chatroomId}`, (message) => {
-      const receivedMessage = JSON.parse(message.body);
-      console.log(`Received new message ${receivedMessage}`);
-    });
+    if (
+      this.privateChatSubscription &&
+      this.currentActiveChatRoomId !== chatroomId
+    ) {
+      this.unsubscribeFromChatRoom();
+    }
+
+    this.privateChatSubscription = this.client.subscribe(
+      `/topic/messages/${chatroomId}`,
+      (message) => {
+        const receivedMessage = JSON.parse(message.body);
+        console.log(`Received new message ${receivedMessage.content}`);
+        store.dispatch(addMessage(receivedMessage));
+      },
+      {
+        Authorization: `Bearer ${this.token}`,
+      },
+    );
+    this.currentActiveChatRoomId = chatroomId;
+  }
+
+  unsubscribeFromChatRoom() {
+    if (this.privateChatSubscription) {
+      this.privateChatSubscription.unsubscribe();
+      console.log(`Unsubscribed from chat ${this.currentActiveChatRoomId}`);
+      this.privateChatSubscription = null;
+      this.currentActiveChatRoomId = null;
+    }
   }
 
   async sendMessage(chatId: string, content: string) {
@@ -68,15 +105,19 @@ export class WebSocketService {
 
     const userId = getStoredUser()?.id || "";
 
+    const messagePayload = {
+      chatId,
+      content,
+    };
+
     try {
       this.client.publish({
-        destination: "/app/message/create",
-        body: JSON.stringify({
-          chatId,
-          content,
-          senderId: userId,
-          timeStamp: new Date().toISOString(),
-        }),
+        destination: `/app/create/${chatId}`,
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(messagePayload),
       });
     } catch (error) {
       console.error("Error sending message", error);

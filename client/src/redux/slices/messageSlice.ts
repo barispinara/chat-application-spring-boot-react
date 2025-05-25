@@ -71,6 +71,13 @@ const messageSlice = createSlice({
     clearError(state) {
       state.error = null;
     },
+    addMessage: (state, action: PayloadAction<Message>) => {
+      const chatId = action.payload.chatRoomId;
+      if (!state.messages[chatId]) {
+        state.messages[chatId] = [];
+      }
+      state.messages[chatId].push(action.payload);
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -94,7 +101,7 @@ const messageSlice = createSlice({
         sendMessage.fulfilled,
         (state, action: PayloadAction<Message>) => {
           state.loading = false;
-          const chatId = action.payload.chatRoom.id;
+          const chatId = action.payload.chatRoomId;
 
           if (!state.messages[chatId]) {
             state.messages[chatId] = [];
@@ -115,7 +122,7 @@ const messageSlice = createSlice({
         getLatestMessage.fulfilled,
         (state, action: PayloadAction<Message>) => {
           state.loading = false;
-          const chatId = action.payload.chatRoom.id;
+          const chatId = action.payload.chatRoomId;
 
           if (!state.messages[chatId]) {
             state.messages[chatId] = [];
@@ -131,5 +138,5 @@ const messageSlice = createSlice({
   },
 });
 
-export const { clearMessages, clearError } = messageSlice.actions;
+export const { clearMessages, clearError, addMessage } = messageSlice.actions;
 export default messageSlice.reducer;

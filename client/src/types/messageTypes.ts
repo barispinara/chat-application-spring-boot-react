@@ -4,11 +4,10 @@ import { ChatRoom } from "./chatRoomTypes";
 export interface Message {
   id: string;
   sentAt: string;
-  updatedAt: string;
   isSeen: boolean;
   sender: User;
   content: string;
-  chatRoom: ChatRoom;
+  chatRoomId: string;
 }
 
 export interface SendMessageRequest {

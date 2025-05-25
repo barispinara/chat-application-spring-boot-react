@@ -82,7 +82,7 @@ const chatRoomSlice = createSlice({
       state.activeChat = action.payload;
     },
     updateLastMessage(state, action: PayloadAction<Message>) {
-      const chatId = action.payload.chatRoom.id;
+      const chatId = action.payload.chatRoomId;
 
       const chatIndex = state.chats.findIndex((chat) => chat.id === chatId);
       if (chatIndex !== -1) {
