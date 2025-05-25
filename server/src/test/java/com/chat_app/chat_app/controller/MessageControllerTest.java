@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -51,6 +52,7 @@ public class MessageControllerTest {
   static SendMessageRequest sendMessageRequest;
   static ObjectMapper mapper;
   static ObjectWriter ow;
+  static Principal dPrincipal;
 
   @BeforeAll
   static void setup() {
@@ -89,6 +91,12 @@ public class MessageControllerTest {
         .content("Test")
         .chatId(dbChatRoom.getId())
         .build();
+    dPrincipal = new Principal() {
+      @Override
+      public String getName() {
+        return dbFirstUser.getUsername();
+      }
+    };
 
     mapper = new ObjectMapper().configure(SerializationFeature.WRAP_ROOT_VALUE, false);
     ow = mapper.writer().withDefaultPrettyPrinter();
@@ -96,7 +104,7 @@ public class MessageControllerTest {
 
   @Test
   public void sendMessageControllerTest() throws Exception {
-    when(messageService.sendMessage(sendMessageRequest)).thenReturn(dbMessage);
+    when(messageService.sendMessage(sendMessageRequest, dPrincipal.getName())).thenReturn(dbMessage);
 
     String requestJson = ow.writeValueAsString(sendMessageRequest);
 
@@ -106,7 +114,7 @@ public class MessageControllerTest {
         .andExpectAll(
             status().isOk());
 
-    verify(messageService).sendMessage(sendMessageRequest);
+    verify(messageService).sendMessage(sendMessageRequest, dPrincipal.getName());
   }
 
   @Test

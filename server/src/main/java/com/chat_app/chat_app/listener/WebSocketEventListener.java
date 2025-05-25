@@ -22,6 +22,7 @@ public class WebSocketEventListener {
 
     @EventListener
     public void handleSessionConnectEvent(SessionConnectedEvent event) {
+        logger.info(event.getMessage().toString());
         logger.error("Received a new web socket connection");
     }
 

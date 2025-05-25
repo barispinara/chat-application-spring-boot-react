@@ -33,13 +33,13 @@ public class MessageServiceTest {
   private MessageRepository messageRepository;
 
   @Mock
-  private AuthenticationService authenticationService;
-
-  @Mock
   private ChatRoomService chatRoomService;
 
   @Mock
   private SimpMessagingTemplate simpMessagingTemplate;
+
+  @Mock
+  private UserService userService;
 
   @InjectMocks
   private MessageService messageService;
@@ -91,13 +91,13 @@ public class MessageServiceTest {
 
   @Test
   public void sendMessageTest() {
-    when(authenticationService.getAuthenticatedCurrentUser()).thenReturn(dbFirstUser);
+    when(userService.findUserByUsername(dbFirstUser.getUsername())).thenReturn(dbFirstUser);
     when(chatRoomService.getChatRoomById(dbChatRoom.getId())).thenReturn(dbChatRoom);
     when(messageRepository.save(any(Message.class))).thenReturn(dbMessage);
 
     String expectedPath = expectedPathPrefix + dbChatRoom.getId();
 
-    messageService.sendMessage(sendMessageRequest);
+    messageService.sendMessage(sendMessageRequest, dbFirstUser.getUsername());
 
     verify(simpMessagingTemplate, times(1)).convertAndSend(expectedPath, dbMessage);
   }
