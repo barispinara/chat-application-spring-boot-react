@@ -1,7 +1,7 @@
 import { Client, StompSubscription } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { getStoredToken, getStoredUser } from "../helper/storage";
-import { useAppDispatch } from "../redux/hooks";
+import { updateLastMessage } from "../redux/slices/chatRoomSlice";
 import { addMessage } from "../redux/slices/messageSlice";
 import { store } from "../redux/store";
 
@@ -57,6 +57,7 @@ export class WebSocketService {
         const notification = JSON.parse(message.body);
         console.log(`Received new notification ${notification}`);
         store.dispatch(addMessage(notification));
+        store.dispatch(updateLastMessage(notification));
       },
       {
         Authorization: `Bearer ${this.token}`,
@@ -80,6 +81,7 @@ export class WebSocketService {
         const receivedMessage = JSON.parse(message.body);
         console.log(`Received new message ${receivedMessage.content}`);
         store.dispatch(addMessage(receivedMessage));
+        store.dispatch(updateLastMessage(receivedMessage));
       },
       {
         Authorization: `Bearer ${this.token}`,

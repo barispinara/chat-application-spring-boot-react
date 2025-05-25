@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +23,6 @@ public class MessageService {
   private final ChatRoomService chatRoomService;
   private final SimpMessagingTemplate messagingTemplate;
   private final UserService userService;
-  private static final Logger logger = LoggerFactory.getLogger(MessageService.class);
 
   public Message sendMessage(SendMessageRequest req, String userUsername) {
     User authUser = userService.findUserByUsername(userUsername);

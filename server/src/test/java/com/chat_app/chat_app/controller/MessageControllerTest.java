@@ -3,7 +3,6 @@ package com.chat_app.chat_app.controller;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -17,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -25,6 +23,7 @@ import com.chat_app.chat_app.model.ChatRoom;
 import com.chat_app.chat_app.model.Message;
 import com.chat_app.chat_app.model.Role;
 import com.chat_app.chat_app.model.User;
+import com.chat_app.chat_app.payload.dto_model.MessageDTO;
 import com.chat_app.chat_app.payload.request.SendMessageRequest;
 import com.chat_app.chat_app.service.JwtService;
 import com.chat_app.chat_app.service.MessageService;
@@ -47,6 +46,7 @@ public class MessageControllerTest {
 
   static ChatRoom dbChatRoom;
   static Message dbMessage;
+  static MessageDTO messageDTO;
   static User dbFirstUser;
   static User dbSecondUser;
   static SendMessageRequest sendMessageRequest;
@@ -87,6 +87,8 @@ public class MessageControllerTest {
         .chatRoom(dbChatRoom)
         .build();
 
+    messageDTO = new MessageDTO(dbMessage);
+
     sendMessageRequest = SendMessageRequest.builder()
         .content("Test")
         .chatId(dbChatRoom.getId())
@@ -103,28 +105,13 @@ public class MessageControllerTest {
   }
 
   @Test
-  public void sendMessageControllerTest() throws Exception {
-    when(messageService.sendMessage(sendMessageRequest, dPrincipal.getName())).thenReturn(dbMessage);
-
-    String requestJson = ow.writeValueAsString(sendMessageRequest);
-
-    mockMvc.perform(post("/message/create")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(requestJson))
-        .andExpectAll(
-            status().isOk());
-
-    verify(messageService).sendMessage(sendMessageRequest, dPrincipal.getName());
-  }
-
-  @Test
   public void getAllMessagesByChatRoomControllerWhenExists() throws Exception {
-    when(messageService.getAllMessagesByChatRoom(dbChatRoom.getId())).thenReturn(List.of(dbMessage));
+    when(messageService.getAllMessagesByChatRoom(dbChatRoom.getId())).thenReturn(List.of(messageDTO));
 
     mockMvc.perform(get("/message/all/{chat_id}", dbChatRoom.getId()))
         .andExpectAll(
             status().isOk(),
-            content().json(ow.writeValueAsString(List.of(dbMessage))));
+            content().json(ow.writeValueAsString(List.of(messageDTO))));
 
     verify(messageService).getAllMessagesByChatRoom(dbChatRoom.getId());
   }
@@ -143,12 +130,12 @@ public class MessageControllerTest {
 
   @Test
   public void getLatestMessageByChatRoomControllerWhenExists() throws Exception {
-    when(messageService.getLatestMessageByChatRoom(dbChatRoom.getId())).thenReturn(Optional.of(dbMessage));
+    when(messageService.getLatestMessageByChatRoom(dbChatRoom.getId())).thenReturn(Optional.of(messageDTO));
 
     mockMvc.perform(get("/message/{chat_id}", dbChatRoom.getId()))
         .andExpectAll(
             status().isOk(),
-            content().json(ow.writeValueAsString(dbMessage)));
+            content().json(ow.writeValueAsString(messageDTO)));
 
     verify(messageService).getLatestMessageByChatRoom(dbChatRoom.getId());
   }

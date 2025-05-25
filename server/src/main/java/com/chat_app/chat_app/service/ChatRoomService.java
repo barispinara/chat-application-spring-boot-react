@@ -1,22 +1,23 @@
 package com.chat_app.chat_app.service;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
+
 import com.chat_app.chat_app.model.ChatRoom;
-import com.chat_app.chat_app.model.Message;
 import com.chat_app.chat_app.model.User;
 import com.chat_app.chat_app.payload.dto_model.MessageDTO;
 import com.chat_app.chat_app.payload.dto_model.UserDTO;
 import com.chat_app.chat_app.payload.response.ChatRoomResponse;
 import com.chat_app.chat_app.repository.ChatRoomRepository;
+
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Service;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor

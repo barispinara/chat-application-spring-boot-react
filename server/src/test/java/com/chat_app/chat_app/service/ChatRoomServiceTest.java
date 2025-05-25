@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
@@ -28,7 +27,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.chat_app.chat_app.model.ChatRoom;
 import com.chat_app.chat_app.model.Role;
 import com.chat_app.chat_app.model.User;
-import com.chat_app.chat_app.payload.response.ChatRoomResponse;
 import com.chat_app.chat_app.repository.ChatRoomRepository;
 
 import jakarta.persistence.EntityExistsException;
@@ -179,7 +177,7 @@ public class ChatRoomServiceTest {
       EntityExistsException exception = assertThrows(EntityExistsException.class,
           () -> chatRoomService.createChatRoom(dbSecondUser.getId()));
 
-        assertEquals("There is already chatroom between these users", exception.getMessage());
+      assertEquals("There is already chatroom between these users", exception.getMessage());
     }
   }
 

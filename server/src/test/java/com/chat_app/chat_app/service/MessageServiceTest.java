@@ -24,6 +24,7 @@ import com.chat_app.chat_app.model.ChatRoom;
 import com.chat_app.chat_app.model.Message;
 import com.chat_app.chat_app.model.Role;
 import com.chat_app.chat_app.model.User;
+import com.chat_app.chat_app.payload.dto_model.MessageDTO;
 import com.chat_app.chat_app.payload.request.SendMessageRequest;
 import com.chat_app.chat_app.repository.MessageRepository;
 
@@ -46,10 +47,12 @@ public class MessageServiceTest {
 
   static ChatRoom dbChatRoom;
   static Message dbMessage;
+  static MessageDTO messageDTO;
   static User dbFirstUser;
   static User dbSecondUser;
   static SendMessageRequest sendMessageRequest;
-  static String expectedPathPrefix = "/chat/";
+  static String messageExpectedPathPrefix = "/topic/messages/";
+  static String notificationExpectedPathPrefix = "/notification";
 
   @BeforeAll
   static void setup() {
@@ -83,6 +86,8 @@ public class MessageServiceTest {
         .chatRoom(dbChatRoom)
         .build();
 
+    messageDTO = new MessageDTO(dbMessage);
+
     sendMessageRequest = SendMessageRequest.builder()
         .content("Test")
         .chatId(dbChatRoom.getId())
@@ -95,11 +100,14 @@ public class MessageServiceTest {
     when(chatRoomService.getChatRoomById(dbChatRoom.getId())).thenReturn(dbChatRoom);
     when(messageRepository.save(any(Message.class))).thenReturn(dbMessage);
 
-    String expectedPath = expectedPathPrefix + dbChatRoom.getId();
+    String expectedPathForMessage = messageExpectedPathPrefix + dbChatRoom.getId();
 
     messageService.sendMessage(sendMessageRequest, dbFirstUser.getUsername());
 
-    verify(simpMessagingTemplate, times(1)).convertAndSend(expectedPath, dbMessage);
+    verify(simpMessagingTemplate, times(1)).convertAndSend(expectedPathForMessage, messageDTO);
+    verify(simpMessagingTemplate, times(dbChatRoom.getUsers().size() - 1)).convertAndSendToUser(
+        dbSecondUser.getUsername(),
+        notificationExpectedPathPrefix, "New message from " + dbFirstUser.getUsername());
   }
 
   @Test
@@ -107,10 +115,10 @@ public class MessageServiceTest {
     when(chatRoomService.getChatRoomById(dbChatRoom.getId())).thenReturn(dbChatRoom);
     when(messageRepository.findAllByChatRoom(dbChatRoom)).thenReturn(List.of(dbMessage));
 
-    List<Message> expectedMessageList = messageService.getAllMessagesByChatRoom(dbChatRoom.getId());
+    List<MessageDTO> expectedMessageList = messageService.getAllMessagesByChatRoom(dbChatRoom.getId());
 
     assertEquals(expectedMessageList.size(), 1);
-    assertEquals(expectedMessageList, List.of(dbMessage));
+    assertEquals(expectedMessageList, List.of(messageDTO));
     assertNotNull(expectedMessageList);
   }
 
@@ -119,7 +127,7 @@ public class MessageServiceTest {
     when(chatRoomService.getChatRoomById(dbChatRoom.getId())).thenReturn(dbChatRoom);
     when(messageRepository.findAllByChatRoom(dbChatRoom)).thenReturn(List.of());
 
-    List<Message> expectedMessageList = messageService.getAllMessagesByChatRoom(dbChatRoom.getId());
+    List<MessageDTO> expectedMessageList = messageService.getAllMessagesByChatRoom(dbChatRoom.getId());
 
     assertEquals(expectedMessageList.size(), 0);
     assertEquals(expectedMessageList, List.of());
@@ -130,10 +138,10 @@ public class MessageServiceTest {
     when(chatRoomService.getChatRoomById(dbChatRoom.getId())).thenReturn(dbChatRoom);
     when(messageRepository.findLatestByChatRoom(dbChatRoom)).thenReturn(Optional.of(dbMessage));
 
-    Optional<Message> message = messageService.getLatestMessageByChatRoom(dbChatRoom.getId());
+    Optional<MessageDTO> message = messageService.getLatestMessageByChatRoom(dbChatRoom.getId());
 
     assertNotEquals(Optional.empty(), message);
-    assertEquals(Optional.of(dbMessage), message);
+    assertEquals(Optional.of(messageDTO), message);
   }
 
   @Test
@@ -141,7 +149,7 @@ public class MessageServiceTest {
     when(chatRoomService.getChatRoomById(dbChatRoom.getId())).thenReturn(dbChatRoom);
     when(messageRepository.findLatestByChatRoom(dbChatRoom)).thenReturn(Optional.empty());
 
-    Optional<Message> message = messageService.getLatestMessageByChatRoom(dbChatRoom.getId());
+    Optional<MessageDTO> message = messageService.getLatestMessageByChatRoom(dbChatRoom.getId());
 
     assertEquals(Optional.empty(), message);
   }
