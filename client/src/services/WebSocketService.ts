@@ -93,7 +93,6 @@ export class WebSocketService {
   unsubscribeFromChatRoom() {
     if (this.privateChatSubscription) {
       this.privateChatSubscription.unsubscribe();
-      console.log(`Unsubscribed from chat ${this.currentActiveChatRoomId}`);
       this.privateChatSubscription = null;
       this.currentActiveChatRoomId = null;
     }
