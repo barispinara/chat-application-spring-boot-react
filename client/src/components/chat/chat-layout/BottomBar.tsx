@@ -55,6 +55,7 @@ const BottomBar: React.FC = () => {
               autoFocus
               value={messageContent}
               onChange={handleMessageChange}
+              onKeyDown={handleKeyPress}
               placeholder="Write your message here..."
               fullWidth
             />

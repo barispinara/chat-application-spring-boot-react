@@ -1,6 +1,6 @@
 import { Client, StompSubscription } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
-import { getStoredToken, getStoredUser } from "../helper/storage";
+import { getStoredToken } from "../helper/storage";
 import { updateLastMessage } from "../redux/slices/chatRoomSlice";
 import { addMessage } from "../redux/slices/messageSlice";
 import { store } from "../redux/store";
@@ -11,11 +11,12 @@ const SOCKET_URL = import.meta.env.VITE_APP_SERVER_URL
 
 export class WebSocketService {
   private client: Client | null = null;
-  private token: string | null = getStoredToken();
+  private token: String | null = null;
   private privateChatSubscription: StompSubscription | null = null;
   private currentActiveChatRoomId: string | null = null;
 
-  connect() {
+  connect(tokenArgs: string) {
+    this.token = tokenArgs;
     if (this.client || !this.token) return;
     this.client = new Client({
       webSocketFactory: () => {
@@ -103,8 +104,6 @@ export class WebSocketService {
       console.error("WebSocket not connected");
       return;
     }
-
-    const userId = getStoredUser()?.id || "";
 
     const messagePayload = {
       chatId,
