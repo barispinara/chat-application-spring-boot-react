@@ -1,6 +1,5 @@
 import { Client, StompSubscription } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
-import { getStoredToken } from "../helper/storage";
 import { updateLastMessage } from "../redux/slices/chatRoomSlice";
 import { addMessage } from "../redux/slices/messageSlice";
 import { store } from "../redux/store";
