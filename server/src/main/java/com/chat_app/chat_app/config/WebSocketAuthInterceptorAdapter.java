@@ -47,12 +47,10 @@ public class WebSocketAuthInterceptorAdapter implements ChannelInterceptor {
 
     // Handle CONNECT command for initial authentication
     if (StompCommand.CONNECT.equals(accessor.getCommand())) {
-      logger.error("StompCommand.CONNECT is triggered");
       authenticateConnection(accessor);
     }
     // Handle MESSAGE commands (like @MessageMapping) - propagate authentication
     else if (StompCommand.SEND.equals(accessor.getCommand())) {
-      logger.error("StompCommand.SEND is triggered");
       authenticateMessage(accessor);
     }
 
@@ -77,8 +75,6 @@ public class WebSocketAuthInterceptorAdapter implements ChannelInterceptor {
       // Also set in SecurityContext for this thread
       SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
-      logger.info("WebSocket connection authenticated successfully for user: {}", username);
-
     } catch (IllegalArgumentException e) {
       logger.error("WebSocket authentication failed: {}", e.getMessage());
       throw e;
@@ -95,15 +91,13 @@ public class WebSocketAuthInterceptorAdapter implements ChannelInterceptor {
       if (userPrincipal instanceof UsernamePasswordAuthenticationToken sessionAuth) {
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(sessionAuth);
-        logger.error("SecurityContext is triggering");
         SecurityContextHolder.setContext(context);
-        logger.error("This is the new SecurityContext {}", SecurityContextHolder.getContext().getAuthentication());
+        logger.debug("This is the new SecurityContext {}", SecurityContextHolder.getContext().getAuthentication());
         return;
       }
 
       // Fallback: Try to authenticate from Authorization header in the message
       String authorizationHeader = accessor.getFirstNativeHeader("Authorization");
-      logger.error("After if is triggered and this is the header {}", authorizationHeader);
       if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
         validateAuthorizationHeader(authorizationHeader);
         String token = authorizationHeader.substring(7).trim();
