@@ -10,14 +10,11 @@ const ChatLayout: React.FC = () => {
   const { activeChat } = useAppSelector((state) => state.chat);
 
   useEffect(() => {
-    console.log(`${activeChat?.id} is here`);
     if (activeChat) {
-      console.log(`${activeChat?.id} subscribe is triggered`);
       webSocketService.subscribeToPrivateChat(activeChat.id);
     }
 
     return () => {
-      console.log(`unsubscribe event triggered ${activeChat?.id}`);
       webSocketService.unsubscribeFromChatRoom();
     };
   }, [activeChat]);

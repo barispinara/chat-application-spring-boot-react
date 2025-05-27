@@ -35,7 +35,6 @@ public class MessageController {
   public void sendMessage(@DestinationVariable Long chatId,
       @Valid SendMessageRequest request,
       Principal principal) {
-    logger.info("{} new message is received", request.getContent());
     messageService.sendMessage(request, principal.getName());
   }
 
