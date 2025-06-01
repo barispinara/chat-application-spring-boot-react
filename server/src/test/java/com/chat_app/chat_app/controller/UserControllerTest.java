@@ -78,6 +78,7 @@ public class UserControllerTest {
         .lastName("test")
         .role(Role.USER)
         .password("encoded")
+        .lastSeen(null)
         .build();
 
     responseUserDTO = UserDTO.builder()
@@ -85,6 +86,7 @@ public class UserControllerTest {
         .username("admin")
         .firstName("admin")
         .lastName("test")
+        .lastSeen(null)
         .build();
 
     authentication = new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword());

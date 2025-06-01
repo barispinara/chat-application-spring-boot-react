@@ -7,6 +7,7 @@ import {
   registerUserType,
 } from "../../types/authTypes";
 import { getStoredToken, getStoredUser } from "../../helper/storage";
+import { timeStamp } from "node:console";
 
 const token = getStoredToken();
 const user = getStoredUser();

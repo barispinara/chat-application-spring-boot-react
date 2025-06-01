@@ -57,6 +57,7 @@ public class ChatRoomControllerTest {
         .firstName("firstTest")
         .lastName("firstTest")
         .password("encoded")
+        .lastSeen(null)
         .role(Role.USER)
         .build();
 
@@ -66,6 +67,7 @@ public class ChatRoomControllerTest {
         .firstName("secondTest")
         .lastName("secondTest")
         .password("encoded")
+        .lastSeen(null)
         .role(Role.USER)
         .build();
 
@@ -95,9 +97,9 @@ public class ChatRoomControllerTest {
         .users(
             Set.of(
                 new UserDTO(dbFirstUser.getId(), dbFirstUser.getUsername(), dbFirstUser.getFirstName(),
-                    dbFirstUser.getLastName()),
+                    dbFirstUser.getLastName(), dbFirstUser.getLastSeen()),
                 new UserDTO(dbSecondUser.getId(), dbSecondUser.getUsername(), dbSecondUser.getFirstName(),
-                    dbSecondUser.getLastName())))
+                    dbSecondUser.getLastName(), dbSecondUser.getLastSeen())))
         .latestMessage(messageDTO)
         .build();
   }

@@ -7,11 +7,16 @@ import { useAppSelector } from "../../../redux/hooks";
 import webSocketService from "../../../services/WebSocketService";
 
 const ChatLayout: React.FC = () => {
-  const { activeChat } = useAppSelector((state) => state.chat);
+  const { activeChat, activeChatTargetUser } = useAppSelector(
+    (state) => state.chat,
+  );
 
   useEffect(() => {
-    if (activeChat) {
-      webSocketService.subscribeToPrivateChat(activeChat.id);
+    if (activeChat && activeChatTargetUser) {
+      webSocketService.subscribeToPrivateChat(
+        activeChat.id,
+        activeChatTargetUser?.username,
+      );
     }
 
     return () => {

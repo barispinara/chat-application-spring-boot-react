@@ -1,6 +1,7 @@
 package com.chat_app.chat_app.listener;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +12,8 @@ import org.springframework.web.socket.messaging.SessionConnectedEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 
+import com.chat_app.chat_app.service.UserService;
+
 import lombok.RequiredArgsConstructor;
 
 @Component
@@ -18,20 +21,30 @@ import lombok.RequiredArgsConstructor;
 public class WebSocketEventListener {
 
   private static final Logger logger = LoggerFactory.getLogger(WebSocketEventListener.class);
+  private final UserService userService;
 
   @EventListener
   public void handleSessionConnectEvent(SessionConnectedEvent event) {
-    logger.error("Received a new web socket connection");
+    StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
+    Principal userPrincipal = accessor.getUser();
+    if (userPrincipal == null) {
+      logger.error("User not found on session connect event");
+    } else {
+      logger.info("Received a new web socket connection {}", userPrincipal.getName());
+      userService.updateUserLastSeen(userPrincipal.getName(), LocalDateTime.now());
+
+    }
   }
 
   @EventListener
   public void handleSessionDisconnectEvent(SessionDisconnectEvent event) {
     StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
     Principal userPrincipal = accessor.getUser();
-    if (userPrincipal != null) {
-      logger.info("Received a new web socket disconnection {}", userPrincipal.getName());
+    if (userPrincipal == null) {
+      logger.error("User not found on session disconnect event");
     } else {
-      logger.error("Error occurred during receiving user information on web socke disconnect event");
+      logger.info("Received a new web socket disconnection {}", userPrincipal.getName());
+      userService.updateUserLastSeen(userPrincipal.getName(), LocalDateTime.now());
     }
   }
 
@@ -39,10 +52,11 @@ public class WebSocketEventListener {
   public void handleWebSocketSubscribeListener(SessionSubscribeEvent event) {
     StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
     Principal userPrincipal = accessor.getUser();
-    if (userPrincipal != null) {
-      logger.info("Received a new web socket connection {}", userPrincipal.getName());
+    if (userPrincipal == null) {
+      logger.error("User not found on session subscribe event ");
     } else {
-      logger.error("Error occurred during receiving user information on web socket connection event");
+      logger.info("User : {} subscribed to this topic {}", userPrincipal.getName(), accessor.getDestination());
     }
+
   }
 }

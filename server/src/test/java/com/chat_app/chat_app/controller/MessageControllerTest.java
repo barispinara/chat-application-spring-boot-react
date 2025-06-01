@@ -62,6 +62,7 @@ public class MessageControllerTest {
         .firstName("firstTest")
         .lastName("firstTest")
         .password("encoded")
+        .lastSeen(null)
         .role(Role.USER)
         .build();
 
@@ -71,6 +72,7 @@ public class MessageControllerTest {
         .firstName("secondTest")
         .lastName("secondTest")
         .password("encoded")
+        .lastSeen(null)
         .role(Role.USER)
         .build();
 

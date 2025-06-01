@@ -11,6 +11,7 @@ import com.chat_app.chat_app.model.ChatRoom;
 import com.chat_app.chat_app.model.Message;
 import com.chat_app.chat_app.model.User;
 import com.chat_app.chat_app.payload.dto_model.MessageDTO;
+import com.chat_app.chat_app.payload.dto_model.UserDTO;
 import com.chat_app.chat_app.payload.request.SendMessageRequest;
 import com.chat_app.chat_app.repository.MessageRepository;
 
@@ -47,6 +48,12 @@ public class MessageService {
     }
 
     return newMessage;
+  }
+
+  public void broadcastLastSeenInformation(String currUsername) {
+    User authUser = userService.findUserByUsername(currUsername);
+    UserDTO authUserDTO = new UserDTO(authUser);
+    messagingTemplate.convertAndSend("/topic/lastseen/" + authUser.getUsername(), authUserDTO);
   }
 
   public List<MessageDTO> getAllMessagesByChatRoom(Long chatRoomId) {

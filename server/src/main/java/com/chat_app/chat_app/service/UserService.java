@@ -17,80 +17,89 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final JwtService jwtService;
-    private final AuthenticationManager authenticationManager;
-    private AuthenticationService authenticationService;
+  private final UserRepository userRepository;
+  private final PasswordEncoder passwordEncoder;
+  private final JwtService jwtService;
+  private final AuthenticationManager authenticationManager;
+  private AuthenticationService authenticationService;
 
-    @Autowired
-    public void setAuthenticationService(@Lazy AuthenticationService authenticationService) {
-        this.authenticationService = authenticationService;
+  @Autowired
+  public void setAuthenticationService(@Lazy AuthenticationService authenticationService) {
+    this.authenticationService = authenticationService;
+  }
+
+  public User findUserByUsername(String username) {
+    return userRepository.findByUsername(username)
+        .orElseThrow(() -> new UsernameNotFoundException("User not found with username " + username));
+  }
+
+  public User findUserById(Long id) {
+    return userRepository.findById(id)
+        .orElseThrow(() -> new EntityNotFoundException("User not found with id " + id));
+  }
+
+  public boolean isUsernameTaken(String username) {
+    return userRepository.existsByUsername(username);
+  }
+
+  public String registerUser(RegisterRequest request) {
+
+    if (isUsernameTaken(request.getUsername())) {
+      throw new IllegalArgumentException("Username is already taken : " + request.getUsername());
     }
 
-    public User findUserByUsername(String username) {
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with username " + username));
-    }
+    User user = User.builder()
+        .firstName(request.getFirstName())
+        .lastName(request.getLastName())
+        .username(request.getUsername())
+        .password(passwordEncoder.encode(request.getPassword()))
+        .lastSeen(null)
+        .role(Role.USER)
+        .build();
 
-    public User findUserById(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id " + id));
-    }
+    User savedUser = userRepository.save(user);
+    return "User registered successfully " + savedUser.getId();
 
-    public boolean isUsernameTaken(String username) {
-        return userRepository.existsByUsername(username);
-    }
+  }
 
-    public String registerUser(RegisterRequest request) {
+  public void updateUserLastSeen(String username, LocalDateTime lastSeen) {
+    User user = findUserByUsername(username);
+    user.setLastSeen(lastSeen);
+    userRepository.save(user);
+  }
 
-        if (isUsernameTaken(request.getUsername())) {
-            throw new IllegalArgumentException("Username is already taken : " + request.getUsername());
-        }
+  public List<User> getAllUsersExceptCurrentUser() {
+    User currentUser = authenticationService.getAuthenticatedCurrentUser();
+    return (List<User>) userRepository.findAllByIdNot(currentUser.getId());
+  }
 
-        var user = User.builder()
-                .firstName(request.getFirstName())
-                .lastName(request.getLastName())
-                .username(request.getUsername())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .role(Role.USER)
-                .build();
+  public AuthenticationResponse loginUser(LoginRequest request) {
+    authenticationManager.authenticate(
+        new UsernamePasswordAuthenticationToken(
+            request.getUsername(),
+            request.getPassword()));
 
-        User savedUser = userRepository.save(user);
-        return "User registered successfully " + savedUser.getId();
+    User user = findUserByUsername(request.getUsername());
 
-    }
+    String jwtToken = jwtService.generateToken(user);
 
-    public List<User> getAllUsersExceptCurrentUser() {
-        User currentUser = authenticationService.getAuthenticatedCurrentUser();
-        return (List<User>) userRepository.findAllByIdNot(currentUser.getId());
-    }
-
-    public AuthenticationResponse loginUser(LoginRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getUsername(),
-                        request.getPassword()));
-
-        User user = findUserByUsername(request.getUsername());
-
-        String jwtToken = jwtService.generateToken(user);
-
-        return AuthenticationResponse.builder()
-                .token(jwtToken)
-                .user(
-                        UserDTO.builder()
-                                .id(user.getId())
-                                .username(user.getUsername())
-                                .firstName(user.getFirstName())
-                                .lastName(user.getLastName())
-                                .build())
-                .build();
-    }
+    return AuthenticationResponse.builder()
+        .token(jwtToken)
+        .user(
+            UserDTO.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .lastSeen(user.getLastSeen())
+                .build())
+        .build();
+  }
 }
