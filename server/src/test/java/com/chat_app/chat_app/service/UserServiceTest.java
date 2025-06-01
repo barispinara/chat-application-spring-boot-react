@@ -76,6 +76,7 @@ public class UserServiceTest {
         .lastName("test")
         .role(Role.USER)
         .password("encoded")
+        .lastSeen(null)
         .build();
 
     responseUserDTO = UserDTO.builder()
@@ -83,6 +84,7 @@ public class UserServiceTest {
         .username("admin")
         .firstName("admin")
         .lastName("test")
+        .lastSeen(null)
         .build();
   }
 

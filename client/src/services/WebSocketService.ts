@@ -1,6 +1,9 @@
 import { Client, StompSubscription } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
-import { updateLastMessage } from "../redux/slices/chatRoomSlice";
+import {
+  setActiveChatTargetUser,
+  updateLastMessage,
+} from "../redux/slices/chatRoomSlice";
 import { addMessage } from "../redux/slices/messageSlice";
 import { store } from "../redux/store";
 
@@ -8,29 +11,40 @@ const SOCKET_URL = import.meta.env.VITE_APP_SERVER_URL
   ? `${import.meta.env.VITE_APP_SERVER_URL}/ws`
   : "http://localhost:8080/ws";
 
+const HEARTBEAT_INTERVAL = import.meta.env.VITE_APP_HEARTBEAT_INTERVAL
+  ? Number(import.meta.env.VITE_APP_HEARTBEAT_INTERVAL)
+  : 30000;
+
 export class WebSocketService {
   private client: Client | null = null;
-  private token: String | null = null;
+  private getToken: () => string | null = () => null;
   private privateChatSubscription: StompSubscription | null = null;
+  private lastSeenSubscription: StompSubscription | null = null;
   private currentActiveChatRoomId: string | null = null;
+  private heartbeatInterval: NodeJS.Timeout | null = null;
 
-  connect(tokenArgs: string) {
-    this.token = tokenArgs;
-    if (this.client || !this.token) return;
+  connect(getToken: () => string | null) {
+    this.getToken = getToken;
+    if (this.client || !this.getToken()) return;
     this.client = new Client({
       webSocketFactory: () => {
-        const socket = new SockJS(`${SOCKET_URL}?token=${this.token}`);
+        const socket = new SockJS(`${SOCKET_URL}?token=${this.getToken()}`);
         return socket;
       },
       connectHeaders: {
-        Authorization: `Bearer ${this.token}`,
+        Authorization: `Bearer ${this.getToken()}`,
       },
+      heartbeatIncoming: 20000, // Server heartbeat
+      heartbeatOutgoing: 20000, // Client heartbeat
       onConnect: () => {
         console.log("Connected to WebSocket");
         this.subscribeToNotification();
+        this.startHeartbeat();
       },
       onDisconnect: () => {
         console.log("Disconnected from WebSocket");
+        this.stopHeartbeat();
+        this.client = null;
       },
       onStompError: (frame) => {
         console.error("STOMP error", frame);
@@ -45,7 +59,42 @@ export class WebSocketService {
 
   disconnect() {
     if (this.client?.connected) {
+      this.stopHeartbeat();
       this.client?.deactivate();
+    }
+  }
+
+  private startHeartbeat() {
+    if (this.heartbeatInterval) return;
+
+    this.heartbeatInterval = setInterval(() => {
+      this.sendHeartbeat();
+    }, HEARTBEAT_INTERVAL);
+
+    // Send initial heartbeat;
+    this.sendHeartbeat();
+  }
+
+  private stopHeartbeat() {
+    if (this.heartbeatInterval) {
+      clearInterval(this.heartbeatInterval);
+      this.heartbeatInterval = null;
+    }
+  }
+
+  private sendHeartbeat() {
+    if (!this.client?.connected) return;
+
+    try {
+      this.client.publish({
+        destination: "/app/heartbeat",
+        headers: {
+          Authorization: `Bearer ${this.getToken()}`,
+          "content-type": "application/json",
+        },
+      });
+    } catch (error) {
+      console.error("Error sending heartbeat", error);
     }
   }
 
@@ -60,12 +109,12 @@ export class WebSocketService {
         store.dispatch(updateLastMessage(notification));
       },
       {
-        Authorization: `Bearer ${this.token}`,
+        Authorization: `Bearer ${this.getToken()}`,
       },
     );
   }
 
-  subscribeToPrivateChat(chatroomId: string) {
+  subscribeToPrivateChat(chatroomId: string, activeChatTargetUsername: string) {
     if (!this.client?.connected) return;
 
     if (
@@ -79,23 +128,47 @@ export class WebSocketService {
       `/topic/messages/${chatroomId}`,
       (message) => {
         const receivedMessage = JSON.parse(message.body);
-        console.log(`Received new message ${receivedMessage.content}`);
         store.dispatch(addMessage(receivedMessage));
         store.dispatch(updateLastMessage(receivedMessage));
       },
       {
-        Authorization: `Bearer ${this.token}`,
+        Authorization: `Bearer ${this.getToken()}`,
       },
     );
+    this.subscribeToLastSeen(activeChatTargetUsername);
+
     this.currentActiveChatRoomId = chatroomId;
+  }
+
+  private subscribeToLastSeen(targetUsername: string) {
+    if (!this.client?.connected) return;
+
+    if (this.lastSeenSubscription) this.lastSeenSubscription.unsubscribe();
+
+    this.lastSeenSubscription = this.client.subscribe(
+      `/topic/lastseen/${targetUsername}`,
+      (message) => {
+        const lastSeenUserData = JSON.parse(message.body);
+        store.dispatch(setActiveChatTargetUser(lastSeenUserData));
+      },
+      {
+        Authorization: `Bearer ${this.getToken()}`,
+      },
+    );
   }
 
   unsubscribeFromChatRoom() {
     if (this.privateChatSubscription) {
       this.privateChatSubscription.unsubscribe();
       this.privateChatSubscription = null;
-      this.currentActiveChatRoomId = null;
     }
+
+    if (this.lastSeenSubscription) {
+      this.lastSeenSubscription.unsubscribe();
+      this.lastSeenSubscription = null;
+    }
+
+    this.currentActiveChatRoomId = null;
   }
 
   async sendMessage(chatId: string, content: string) {
@@ -113,7 +186,7 @@ export class WebSocketService {
       this.client.publish({
         destination: `/app/create/${chatId}`,
         headers: {
-          Authorization: `Bearer ${this.token}`,
+          Authorization: `Bearer ${this.getToken()}`,
           "content-type": "application/json",
         },
         body: JSON.stringify(messagePayload),

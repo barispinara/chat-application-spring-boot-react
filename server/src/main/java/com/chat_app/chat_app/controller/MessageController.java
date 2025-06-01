@@ -1,6 +1,7 @@
 package com.chat_app.chat_app.controller;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.chat_app.chat_app.payload.dto_model.MessageDTO;
 import com.chat_app.chat_app.payload.request.SendMessageRequest;
 import com.chat_app.chat_app.service.MessageService;
+import com.chat_app.chat_app.service.UserService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +32,7 @@ public class MessageController {
   private static final Logger logger = LoggerFactory.getLogger(MessageController.class);
 
   private final MessageService messageService;
+  private final UserService userService;
 
   @MessageMapping("/create/{chatId}")
   public void sendMessage(@DestinationVariable Long chatId,
@@ -42,6 +45,17 @@ public class MessageController {
   public void notificationMessage(@DestinationVariable String userUsername,
       SimpMessageHeaderAccessor headerAccessor) {
     logger.info("{} user is received new notification", userUsername);
+  }
+
+  @MessageMapping("/heartbeat")
+  public void handleHeartbeat(Principal principal) {
+    userService.updateUserLastSeen(principal.getName(), LocalDateTime.now());
+    messageService.broadcastLastSeenInformation(principal.getName());
+  }
+
+  @MessageMapping("/lastseen/{userUsername}")
+  public void handleLastSeenRequest(@DestinationVariable String userUsername, Principal principal) {
+    logger.error("{} user is received new notification", userUsername);
   }
 
   @GetMapping("/all/{chat_id}")

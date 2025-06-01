@@ -13,7 +13,7 @@ const Chat: React.FC = () => {
 
   useEffect(() => {
     if (isAuthenticated && token) {
-      webSocketService.connect(token);
+      webSocketService.connect(() => token);
     }
     return () => {
       webSocketService.disconnect();

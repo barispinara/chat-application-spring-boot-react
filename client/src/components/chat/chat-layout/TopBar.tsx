@@ -1,18 +1,42 @@
 import { Avatar, Box, Typography } from "@mui/material";
+import { differenceInSeconds, formatDistanceToNow, parseISO } from "date-fns";
 import React, { useEffect, useState } from "react";
 import { useAppSelector } from "../../../redux/hooks";
-import { User } from "../../../types/authTypes";
 
 const TopBar: React.FC = () => {
-  const { activeChat } = useAppSelector((state) => state.chat);
-  const { user } = useAppSelector((state) => state.auth);
-  const [targetUser, setTargetUser] = useState<User>();
+  const { activeChat, activeChatTargetUser } = useAppSelector(
+    (state) => state.chat,
+  );
+
+  // State to force re-render every 15 seconds for last seen updates
+  const [, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
-    if (activeChat) {
-      setTargetUser(activeChat.users.find((cUser) => cUser.id !== user?.id));
+    // Update current time every 15 seconds to refresh last seen display
+    const interval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 15000); // Update every 15 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const renderLastSeen = (lastSeen?: string) => {
+    if (!lastSeen) return "User last seen information not found";
+
+    try {
+      const lastSeenDate = parseISO(lastSeen);
+      const secondsDiff = differenceInSeconds(new Date(), lastSeenDate);
+
+      if (secondsDiff < 30) {
+        return "online";
+      }
+
+      const formatted = formatDistanceToNow(lastSeenDate, { addSuffix: true });
+      return `Last seen ${formatted}`;
+    } catch (e) {
+      return "Invalid last seen format";
     }
-  }, [activeChat]);
+  };
 
   return (
     <div>
@@ -36,14 +60,15 @@ const TopBar: React.FC = () => {
                 width: 50,
                 height: 50,
               }}
-              alt={targetUser?.firstName}
+              alt={activeChatTargetUser?.firstName}
             />
             <Box ml={1}>
               <Typography variant="h5">
-                {targetUser?.firstName} {targetUser?.lastName}
+                {activeChatTargetUser?.firstName}{" "}
+                {activeChatTargetUser?.lastName}
               </Typography>
               <Typography variant="subtitle1">
-                Last Seen Information Will Be Implemented
+                {renderLastSeen(activeChatTargetUser?.lastSeen)}
               </Typography>
             </Box>
           </Box>

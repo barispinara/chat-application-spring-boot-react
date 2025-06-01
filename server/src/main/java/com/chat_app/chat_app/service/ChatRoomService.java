@@ -79,6 +79,7 @@ public class ChatRoomService {
           .username(u.getUsername())
           .firstName(u.getFirstName())
           .lastName(u.getLastName())
+          .lastSeen(u.getLastSeen())
           .build();
 
       userDTOList.add(newUserDTO);

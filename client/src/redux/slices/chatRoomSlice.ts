@@ -2,10 +2,12 @@ import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { ChatRoomService } from "../../services/ChatRoomService";
 import { ChatRoom, ChatRoomState } from "../../types/chatRoomTypes";
 import { Message } from "../../types/messageTypes";
+import { User } from "../../types/authTypes";
 
 const initialState: ChatRoomState = {
   chats: [],
   activeChat: null,
+  activeChatTargetUser: null,
   loading: false,
   error: null,
 };
@@ -81,6 +83,10 @@ const chatRoomSlice = createSlice({
     setActiveChat(state, action: PayloadAction<ChatRoom>) {
       state.activeChat = action.payload;
     },
+    setActiveChatTargetUser(state, action: PayloadAction<User | undefined>) {
+      if (action.payload !== undefined)
+        state.activeChatTargetUser = action.payload;
+    },
     updateLastMessage(state, action: PayloadAction<Message>) {
       const chatId = action.payload.chatRoomId;
 
@@ -91,6 +97,9 @@ const chatRoomSlice = createSlice({
     },
     clearActiveChat(state) {
       state.activeChat = null;
+    },
+    clearActiveChatTargetUser(state) {
+      state.activeChatTargetUser = null;
     },
     clearError(state) {
       state.error = null;
@@ -161,6 +170,12 @@ const chatRoomSlice = createSlice({
   },
 });
 
-export const { setActiveChat, updateLastMessage, clearActiveChat, clearError } =
-  chatRoomSlice.actions;
+export const {
+  setActiveChat,
+  setActiveChatTargetUser,
+  updateLastMessage,
+  clearActiveChat,
+  clearActiveChatTargetUser,
+  clearError,
+} = chatRoomSlice.actions;
 export default chatRoomSlice.reducer;

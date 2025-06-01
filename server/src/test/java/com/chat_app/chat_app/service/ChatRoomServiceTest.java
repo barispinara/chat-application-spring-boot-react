@@ -58,6 +58,7 @@ public class ChatRoomServiceTest {
         .firstName("firstTest")
         .lastName("firstTest")
         .password("encoded")
+        .lastSeen(null)
         .role(Role.USER)
         .build();
 
@@ -67,6 +68,7 @@ public class ChatRoomServiceTest {
         .firstName("secondTest")
         .lastName("secondTest")
         .password("encoded")
+        .lastSeen(null)
         .role(Role.USER)
         .build();
 
