@@ -42,8 +42,7 @@ public class MessageService {
 
     for (User user : currChatRoom.getUsers()) {
       if (!user.getUsername().equals(authUser.getUsername())) {
-        messagingTemplate.convertAndSendToUser(user.getUsername(), "/notification", "New message from " +
-            authUser.getUsername());
+        messagingTemplate.convertAndSend("/topic/notification/" + user.getUsername(), newMessageDTO);
       }
     }
 

@@ -9,11 +9,16 @@ import { Message } from "../../types/messageTypes";
 
 const Chat: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { isAuthenticated, token } = useAppSelector((state) => state.auth);
+  const { isAuthenticated, token, user } = useAppSelector(
+    (state) => state.auth,
+  );
 
   useEffect(() => {
-    if (isAuthenticated && token) {
-      webSocketService.connect(() => token);
+    if (isAuthenticated && token && user) {
+      webSocketService.connect(
+        () => token,
+        () => user,
+      );
     }
     return () => {
       webSocketService.disconnect();
