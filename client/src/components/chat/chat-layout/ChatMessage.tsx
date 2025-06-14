@@ -4,6 +4,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../../redux/hooks";
 import { getAllMessages } from "../../../redux/slices/messageSlice";
 import { Message } from "../../../types/messageTypes";
+import { alpha } from "@mui/material/styles";
+import { useTheme } from "@mui/material/styles";
 
 const ChatMessage: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -11,7 +13,8 @@ const ChatMessage: React.FC = () => {
   const { activeChat } = useAppSelector((state) => state.chat);
   const { loading, messages, error } = useAppSelector((state) => state.message);
   const [currentChatMessages, setCurrentChatMessages] = useState<Message[]>([]);
-  const bottomRef = useRef<HTMLDivElement | null>(null);
+  const messagesContainerRef = useRef<HTMLUListElement>(null);
+  const theme = useTheme();
 
   useEffect(() => {
     if (activeChat) {
@@ -28,15 +31,37 @@ const ChatMessage: React.FC = () => {
   }, [messages, activeChat]);
 
   useEffect(() => {
-    if (bottomRef.current) {
-      bottomRef.current.scrollIntoView({ behavior: "smooth" });
+    if (messagesContainerRef.current) {
+      const container = messagesContainerRef.current;
+      container.scrollTop = container.scrollHeight;
     }
   }, [currentChatMessages]);
 
   return (
     <Box p={3}>
       {activeChat && (
-        <List sx={{ overflowY: "auto", maxHeight: "70vh", px: 1 }}>
+        <List 
+          ref={messagesContainerRef}
+          sx={{ 
+            overflowY: "auto", 
+            maxHeight: "70vh", 
+            px: 1,
+            "&::-webkit-scrollbar": {
+              width: "8px",
+            },
+            "&::-webkit-scrollbar-track": {
+              background: "rgba(0, 0, 0, 0.1)",
+              borderRadius: "4px",
+            },
+            "&::-webkit-scrollbar-thumb": {
+              background: "rgba(0, 0, 0, 0.2)",
+              borderRadius: "4px",
+              "&:hover": {
+                background: "rgba(0, 0, 0, 0.3)",
+              },
+            },
+          }}
+        >
           {currentChatMessages.map((currMessage, index) => {
             const isOwnMessage = currMessage.sender.username === user?.username;
             const sentAt = parseISO(currMessage.sentAt);
@@ -68,7 +93,8 @@ const ChatMessage: React.FC = () => {
                         variant="caption"
                         sx={{
                           px: 1.5,
-                          backgroundColor: "#f0f0f0",
+                          backgroundColor: theme.palette.mode === 'dark' ? alpha(theme.palette.background.paper, 0.8) : alpha(theme.palette.background.paper, 0.8),
+                          color: theme.palette.text.primary,
                           borderRadius: 1,
                           position: "relative",
                           top: "-10px",
@@ -91,8 +117,10 @@ const ChatMessage: React.FC = () => {
                 >
                   <Box
                     sx={{
-                      backgroundColor: isOwnMessage ? "#DCF8C6" : "#FFFFFF",
-                      color: "#000",
+                      backgroundColor: isOwnMessage 
+                        ? alpha(theme.palette.primary.main, 0.15)
+                        : alpha(theme.palette.secondary.main, 0.1),
+                      color: theme.palette.text.primary,
                       px: 2,
                       py: 1.5,
                       borderRadius: 2,
@@ -100,6 +128,7 @@ const ChatMessage: React.FC = () => {
                       borderTopRightRadius: isOwnMessage ? 4 : 16,
                       maxWidth: "75%",
                       boxShadow: 1,
+                      backdropFilter: "blur(8px)",
                     }}
                   >
                     <Typography variant="body1" sx={{ wordWrap: "break-word" }}>
@@ -110,7 +139,7 @@ const ChatMessage: React.FC = () => {
                       sx={{
                         display: "block",
                         textAlign: "right",
-                        color: "gray",
+                        color: theme.palette.text.secondary,
                         mt: 0.5,
                       }}
                     >
@@ -121,7 +150,6 @@ const ChatMessage: React.FC = () => {
               </Box>
             );
           })}
-          <div ref={bottomRef} />
         </List>
       )}
     </Box>
