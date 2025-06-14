@@ -1,10 +1,10 @@
-import { Box, useTheme, alpha, IconButton } from "@mui/material";
+import { alpha, Box, useTheme } from "@mui/material";
 import React, { useEffect } from "react";
 import ChatLayout from "../../components/chat/chat-layout";
 import Sidebar from "../../components/chat/sidebar";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
-import webSocketService from "../../services/WebSocketService";
 import { updateLastMessage } from "../../redux/slices/chatRoomSlice";
+import webSocketService from "../../services/WebSocketService";
 import { Message } from "../../types/messageTypes";
 
 const Chat: React.FC = () => {
@@ -54,7 +54,7 @@ const Chat: React.FC = () => {
         overflow: "hidden",
         background: `linear-gradient(135deg, ${alpha(
           theme.palette.primary.main,
-          0.1
+          0.1,
         )} 0%, ${alpha(theme.palette.secondary.main, 0.1)} 100%)`,
         position: "relative",
         "&::before": {
@@ -66,7 +66,7 @@ const Chat: React.FC = () => {
           bottom: 0,
           background: `radial-gradient(circle at 50% 50%, ${alpha(
             theme.palette.primary.main,
-            0.1
+            0.1,
           )} 0%, transparent 50%)`,
           animation: "pulse 8s infinite",
           "@keyframes pulse": {
@@ -94,17 +94,11 @@ const Chat: React.FC = () => {
           backdropFilter: "blur(8px)",
           borderRadius: "16px 0 0 16px",
           margin: "16px 0 16px 16px",
-          boxShadow: `0 8px 32px 0 ${alpha(
-            theme.palette.primary.main,
-            0.1
-          )}`,
+          boxShadow: `0 8px 32px 0 ${alpha(theme.palette.primary.main, 0.1)}`,
           border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
           transition: "all 0.3s ease",
           "&:hover": {
-            boxShadow: `0 8px 32px 0 ${alpha(
-              theme.palette.primary.main,
-              0.2
-            )}`,
+            boxShadow: `0 8px 32px 0 ${alpha(theme.palette.primary.main, 0.2)}`,
           },
           overflow: "hidden",
         }}
@@ -119,17 +113,11 @@ const Chat: React.FC = () => {
           backdropFilter: "blur(8px)",
           borderRadius: "0 16px 16px 0",
           margin: "16px 16px 16px 0",
-          boxShadow: `0 8px 32px 0 ${alpha(
-            theme.palette.primary.main,
-            0.1
-          )}`,
+          boxShadow: `0 8px 32px 0 ${alpha(theme.palette.primary.main, 0.1)}`,
           border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
           transition: "all 0.3s ease",
           "&:hover": {
-            boxShadow: `0 8px 32px 0 ${alpha(
-              theme.palette.primary.main,
-              0.2
-            )}`,
+            boxShadow: `0 8px 32px 0 ${alpha(theme.palette.primary.main, 0.2)}`,
           },
           overflow: "hidden",
         }}

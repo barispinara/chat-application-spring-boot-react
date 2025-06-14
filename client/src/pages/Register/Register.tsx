@@ -1,13 +1,18 @@
-import { Box, Container, Typography, useTheme, alpha, IconButton } from "@mui/material";
+import { Celebration, DarkMode, LightMode } from "@mui/icons-material";
+import {
+  alpha,
+  Box,
+  Container,
+  IconButton,
+  Typography,
+  useTheme,
+} from "@mui/material";
 import RegisterForm from "../../components/auth/RegisterForm";
-import { useNavigate } from "react-router-dom";
-import { DarkMode, LightMode, Celebration } from "@mui/icons-material";
-import { useThemeContext } from "../../context/ThemeContext";
 import PulseIcon from "../../components/icons/PulseIcon";
+import { useThemeContext } from "../../context/ThemeContext";
 
 const Register = () => {
   const theme = useTheme();
-  const navigate = useNavigate();
   const { isDarkMode, toggleTheme } = useThemeContext();
 
   return (
@@ -19,7 +24,7 @@ const Register = () => {
         justifyContent: "center",
         background: `linear-gradient(135deg, ${alpha(
           theme.palette.primary.main,
-          0.1
+          0.1,
         )} 0%, ${alpha(theme.palette.secondary.main, 0.1)} 100%)`,
         position: "relative",
         overflow: "hidden",
@@ -32,7 +37,7 @@ const Register = () => {
           bottom: 0,
           background: `radial-gradient(circle at 50% 50%, ${alpha(
             theme.palette.primary.main,
-            0.1
+            0.1,
           )} 0%, transparent 50%)`,
           animation: "pulse 8s infinite",
           "@keyframes pulse": {
@@ -88,16 +93,13 @@ const Register = () => {
             backdropFilter: "blur(8px)",
             padding: 4,
             borderRadius: 4,
-            boxShadow: `0 8px 32px 0 ${alpha(
-              theme.palette.primary.main,
-              0.1
-            )}`,
+            boxShadow: `0 8px 32px 0 ${alpha(theme.palette.primary.main, 0.1)}`,
             border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
             transition: "all 0.3s ease",
             "&:hover": {
               boxShadow: `0 8px 32px 0 ${alpha(
                 theme.palette.primary.main,
-                0.2
+                0.2,
               )}`,
               transform: "translateY(-5px)",
             },
@@ -133,12 +135,12 @@ const Register = () => {
             </Typography>
           </Box>
 
-          <Box 
-            sx={{ 
-              display: "flex", 
-              alignItems: "center", 
-              justifyContent: "center", 
-              gap: 1, 
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 1,
               mb: 2,
               animation: "fadeIn 0.5s ease-in",
               "@keyframes fadeIn": {
@@ -157,16 +159,16 @@ const Register = () => {
             >
               Join Us Today
             </Typography>
-            <Celebration 
-              sx={{ 
-                fontSize: 24, 
+            <Celebration
+              sx={{
+                fontSize: 24,
                 color: theme.palette.primary.main,
                 animation: "bounce 1s infinite",
                 "@keyframes bounce": {
                   "0%, 100%": { transform: "translateY(0)" },
                   "50%": { transform: "translateY(-5px)" },
                 },
-              }} 
+              }}
             />
           </Box>
 
@@ -182,7 +184,8 @@ const Register = () => {
               textAlign: "center",
             }}
           >
-            Create your account and start connecting with people around the world
+            Create your account and start connecting with people around the
+            world
           </Typography>
 
           <RegisterForm />
@@ -193,3 +196,4 @@ const Register = () => {
 };
 
 export default Register;
+
