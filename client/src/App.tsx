@@ -22,11 +22,8 @@ function App() {
             backgroundColor: theme.palette.background.default,
           },
           "#root": {
-            height: "95%",
-            width: "95%",
-            borderRadius: "16px",
-            boxShadow: "0 0 20px rgba(0,0,0,0.5)",
-            padding: "16px",
+            height: "100%",
+            width: "100%",
             backgroundColor: theme.palette.background.paper,
           },
         }}
