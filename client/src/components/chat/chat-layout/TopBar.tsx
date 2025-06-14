@@ -1,9 +1,10 @@
-import { Avatar, Box, Typography } from "@mui/material";
+import { alpha, Avatar, Box, Typography, useTheme } from "@mui/material";
 import { differenceInSeconds, formatDistanceToNow, parseISO } from "date-fns";
 import React, { useEffect, useState } from "react";
 import { useAppSelector } from "../../../redux/hooks";
 
 const TopBar: React.FC = () => {
+  const theme = useTheme();
   const { activeChat, activeChatTargetUser } = useAppSelector(
     (state) => state.chat,
   );
@@ -21,7 +22,9 @@ const TopBar: React.FC = () => {
   }, []);
 
   const renderLastSeen = (lastSeen?: string) => {
-    if (!lastSeen) return "User last seen information not found";
+    console.log(lastSeen)
+    if (lastSeen === null || lastSeen === undefined) return "User last seen information not found";
+    if (lastSeen === "") return "";
 
     try {
       const lastSeenDate = parseISO(lastSeen);
@@ -59,9 +62,16 @@ const TopBar: React.FC = () => {
               sx={{
                 width: 50,
                 height: 50,
+                border: `2px solid ${alpha(
+                  theme.palette.primary.main,
+                  0.2
+                )}`,
+                transition: "all 0.3s ease",
               }}
               alt={activeChatTargetUser?.firstName}
-            />
+            >
+              {activeChatTargetUser?.firstName[0]}
+            </Avatar>
             <Box ml={1}>
               <Typography variant="h5">
                 {activeChatTargetUser?.firstName}{" "}

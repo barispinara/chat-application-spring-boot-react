@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      @media (prefers-color-scheme: dark) {
+        .icon-fill { fill: #818CF8; }
+        .icon-stroke { stroke: #818CF8; }
+      }
+      @media (prefers-color-scheme: light) {
+        .icon-fill { fill: #6366F1; }
+        .icon-stroke { stroke: #6366F1; }
+      }
+    </style>
+  </defs>
+  <!-- Modern chat bubble with rounded corners -->
+  <path
+    d="M20 2H4C2.9 2 2 2.9 2 4V16C2 17.1 2.9 18 4 18H6L8 22L10 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2Z"
+    class="icon-fill"
+    opacity="0.9"
+  />
+  
+  <!-- Pulse wave circles -->
+  <circle
+    cx="12"
+    cy="10"
+    r="3"
+    fill="none"
+    class="icon-stroke"
+    stroke-width="1.5"
+    opacity="0.3"
+  />
+  
+  <!-- Center dot -->
+  <circle
+    cx="12"
+    cy="10"
+    r="2"
+    class="icon-fill"
+  />
+  
+  <!-- Decorative elements -->
+  <path
+    d="M7 8H9M15 8H17M7 12H9M15 12H17"
+    class="icon-stroke"
+    stroke-width="1.5"
+    stroke-linecap="round"
+    opacity="0.5"
+  />
+</svg> 

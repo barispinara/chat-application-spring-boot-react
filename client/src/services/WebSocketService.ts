@@ -6,6 +6,7 @@ import {
 } from "../redux/slices/chatRoomSlice";
 import { addMessage } from "../redux/slices/messageSlice";
 import { store } from "../redux/store";
+import { User } from "../types/authTypes";
 
 const SOCKET_URL = import.meta.env.VITE_APP_SERVER_URL
   ? `${import.meta.env.VITE_APP_SERVER_URL}/ws`
@@ -20,10 +21,11 @@ export class WebSocketService {
   private getToken: () => string | null = () => null;
   private privateChatSubscription: StompSubscription | null = null;
   private lastSeenSubscription: StompSubscription | null = null;
+  private notificationSubscription: StompSubscription | null = null;
   private currentActiveChatRoomId: string | null = null;
   private heartbeatInterval: NodeJS.Timeout | null = null;
 
-  connect(getToken: () => string | null) {
+  connect(getToken: () => string | null, getUser: () => User | null) {
     this.getToken = getToken;
     if (this.client || !this.getToken()) return;
     this.client = new Client({
@@ -38,7 +40,7 @@ export class WebSocketService {
       heartbeatOutgoing: 20000, // Client heartbeat
       onConnect: () => {
         console.log("Connected to WebSocket");
-        this.subscribeToNotification();
+        this.subscribeToNotification(getUser);
         this.startHeartbeat();
       },
       onDisconnect: () => {
@@ -60,6 +62,8 @@ export class WebSocketService {
   disconnect() {
     if (this.client?.connected) {
       this.stopHeartbeat();
+      this.unsubscribeFromChatRoom();
+      this.unsubscribeFromNotification();
       this.client?.deactivate();
     }
   }
@@ -98,13 +102,12 @@ export class WebSocketService {
     }
   }
 
-  subscribeToNotification() {
+  subscribeToNotification(getUser: () => User | null) {
     if (!this.client?.connected) return;
-    this.client.subscribe(
-      `/user/notification`,
+    this.notificationSubscription = this.client.subscribe(
+      `/topic/notification/${getUser()?.username}`,
       (message) => {
         const notification = JSON.parse(message.body);
-        console.log(`Received new notification ${notification}`);
         store.dispatch(addMessage(notification));
         store.dispatch(updateLastMessage(notification));
       },
@@ -169,6 +172,13 @@ export class WebSocketService {
     }
 
     this.currentActiveChatRoomId = null;
+  }
+
+  unsubscribeFromNotification() {
+    if (this.notificationSubscription) {
+      this.notificationSubscription.unsubscribe();
+      this.notificationSubscription = null;
+    }
   }
 
   async sendMessage(chatId: string, content: string) {
