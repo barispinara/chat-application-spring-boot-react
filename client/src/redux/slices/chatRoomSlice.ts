@@ -91,7 +91,10 @@ const chatRoomSlice = createSlice({
       const chatId = action.payload.chatRoomId;
 
       const chatIndex = state.chats.findIndex((chat) => chat.id === chatId);
-      if (chatIndex !== -1) {
+      if (
+        chatIndex !== -1 &&
+        state.chats[chatIndex].latestMessage.id !== action.payload.id
+      ) {
         state.chats[chatIndex].latestMessage = action.payload;
       }
     },
